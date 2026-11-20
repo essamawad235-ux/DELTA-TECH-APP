@@ -10,6 +10,7 @@ import {
   updateDoc, 
   deleteDoc
 } from 'firebase/firestore';
+const appId = "delta-tech-app";
 import { 
   Smartphone, 
   Plus, 
