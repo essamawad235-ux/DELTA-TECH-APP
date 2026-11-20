@@ -39,8 +39,15 @@ const fallbackConfig = {
   appId: "YOUR_APP_ID"
 };
 
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'delta-technology-app';
+const firebaseConfig = {
+  apiKey: "AIzaSyDMTlRJIU7n9FS4RwJ8anvXnHG2CEjSMBE",
+  authDomain: "delta-technoloogy.firebaseapp.com",
+  projectId: "delta-technoloogy",
+  storageBucket: "delta-technoloogy.firebasestorage.app",
+  messagingSenderId: "884629212277",
+  appId: "1:884629212277:web:ab56e6c828804666947c3c",
+  measurementId: "G-YBZGK84RPS"
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
