@@ -19,9 +19,8 @@ import {
 } from 'firebase/firestore';
 
 // ==========================================
-// 1. إعدادات Firebase (بدون process.env عشان يبني على أي بيئة فوراً)
+// 1. إعدادات Firebase (تأكد من مطابقة projectId و appId لبيانات مشروعك)
 // ==========================================
-// ملحوظة: اتأكد إن projectId و appId هنا هم نفس اللي في Project Settings في Firebase Console
 const firebaseConfig = {
   apiKey: "AIzaSyDMTlRJIU7n9FS4RwJ8anvXnHG2CEjSMBE",
   authDomain: "delta-tech-app.firebaseapp.com",
@@ -58,6 +57,14 @@ const IconUpload = ({ className = "w-4 h-4" }) => (
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
     <polyline points="17 8 12 3 7 8" />
     <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
+
+const IconDownload = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
   </svg>
 );
 
@@ -195,253 +202,4 @@ export default function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError("");
-    setIsLoggingIn(true);
-    try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      setEmail("");
-      setPassword("");
-    } catch (err) {
-      console.error("Login failed:", err);
-      setLoginError("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-  };
-
-  // استيراد البيانات من ملف CSV (شيت الحسابات)
-  const handleCSVImport = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImporting(true);
-    try {
-      const text = await file.text();
-      const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
-      if (lines.length < 2) {
-        alert("الملف فارغ أو لا يحتوي على صفوف بيانات.");
-        setImporting(false);
-        return;
-      }
-
-      // تخطي صف العناوين الأول وقراءة باقي الصفوف
-      const batch = writeBatch(db);
-      const colRef = collection(db, "artifacts", appId, "public", "data", "devices");
-      let count = 0;
-
-      for (let i = 1; i < lines.length; i++) {
-        // تقسيم الأعمدة مع مراعاة الفواصل
-        const cols = lines[i].split(",").map((c) => c.replace(/^"|"$/g, "").trim());
-        if (!cols[0]) continue;
-
-        const newDocRef = doc(colRef);
-        batch.set(newDocRef, {
-          deviceName: cols[0] || "جهاز غير محدد",
-          storage: cols[1] || "",
-          imei: cols[2] || "",
-          buyPrice: isAdmin ? Number(cols[3]) || 0 : 0,
-          sellPrice: Number(cols[4]) || 0,
-          status: cols[5] && ["متاح", "مباع", "صيانة"].includes(cols[5]) ? cols[5] : "متاح",
-          clientOrSupplier: cols[6] || "",
-          notes: cols[7] || "",
-          condition: "مستعمل كسر زيرو",
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-        count++;
-      }
-
-      await batch.commit();
-      alert(`تم استيراد ${count} جهاز بنجاح!`);
-    } catch (err) {
-      console.error("CSV Import error:", err);
-      alert("حدث خطأ أثناء قراءة الملف. تأكد إنه محفوظ بصيغة CSV UTF-8.");
-    } finally {
-      setImporting(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const stats = useMemo(() => {
-    const totalDevices = devices.length;
-    const availableCount = devices.filter((d) => d.status === "متاح").length;
-    const soldDevices = devices.filter((d) => d.status === "مباع");
-    const totalRevenue = soldDevices.reduce((sum, d) => sum + (Number(d.sellPrice) || 0), 0);
-    const totalProfit = soldDevices.reduce(
-      (sum, d) => sum + ((Number(d.sellPrice) || 0) - (Number(d.buyPrice) || 0)),
-      0
-    );
-    const inventoryCost = devices
-      .filter((d) => d.status === "متاح")
-      .reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0);
-
-    return { totalDevices, availableCount, totalRevenue, totalProfit, inventoryCost };
-  }, [devices]);
-
-  const filteredDevices = useMemo(() => {
-    return devices.filter((item) => {
-      const matchesSearch =
-        item.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.imei?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.clientOrSupplier?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [devices, searchTerm, statusFilter]);
-
-  const openAddModal = () => {
-    setEditingItem(null);
-    setFormData({
-      deviceName: "",
-      imei: "",
-      storage: "",
-      condition: "مستعمل كسر زيرو",
-      buyPrice: "",
-      sellPrice: "",
-      status: "متاح",
-      clientOrSupplier: "",
-      notes: "",
-    });
-    setIsFormOpen(true);
-  };
-
-  const openEditModal = (item) => {
-    setEditingItem(item);
-    setFormData({
-      deviceName: item.deviceName || "",
-      imei: item.imei || "",
-      storage: item.storage || "",
-      condition: item.condition || "مستعمل كسر زيرو",
-      buyPrice: item.buyPrice || "",
-      sellPrice: item.sellPrice || "",
-      status: item.status || "متاح",
-      clientOrSupplier: item.clientOrSupplier || "",
-      notes: item.notes || "",
-    });
-    setIsFormOpen(true);
-  };
-
-  const handleSaveDevice = async (e) => {
-    e.preventDefault();
-    if (!formData.deviceName.trim()) return;
-
-    const payload = {
-      deviceName: formData.deviceName,
-      imei: formData.imei,
-      storage: formData.storage,
-      condition: formData.condition,
-      buyPrice: isAdmin
-        ? Number(formData.buyPrice) || 0
-        : editingItem
-        ? Number(editingItem.buyPrice) || 0
-        : 0,
-      sellPrice: Number(formData.sellPrice) || 0,
-      status: formData.status,
-      clientOrSupplier: formData.clientOrSupplier,
-      notes: formData.notes,
-      updatedAt: serverTimestamp(),
-    };
-
-    try {
-      if (editingItem) {
-        const docRef = doc(db, "artifacts", appId, "public", "data", "devices", editingItem.id);
-        await updateDoc(docRef, payload);
-      } else {
-        const colRef = collection(db, "artifacts", appId, "public", "data", "devices");
-        await addDoc(colRef, {
-          ...payload,
-          createdAt: serverTimestamp(),
-        });
-      }
-      setIsFormOpen(false);
-    } catch (err) {
-      console.error("Save error:", err);
-      alert("حدث خطأ أثناء الحفظ. تأكد من صلاحيات الحساب.");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!isAdmin) return;
-    if (!window.confirm("هل أنت متأكد من حذف هذا الجهاز نهائياً؟")) return;
-    try {
-      await deleteDoc(doc(db, "artifacts", appId, "public", "data", "devices", id));
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("فشل الحذف: الصلاحية متاحة لحساب الإدارة فقط.");
-    }
-  };
-
-  if (authLoading) {
-    return (
-      <div dir="rtl" className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4">
-        <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-sm text-slate-400">جاري التحقق من الجلسة...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center text-cyan-400 mx-auto">
-              <IconPhone className="w-7 h-7" />
-            </div>
-            <h1 className="text-2xl font-bold text-white tracking-wide">DELTA TECHNOLOGY</h1>
-            <p className="text-xs text-slate-400">تسجيل الدخول إلى نظام إدارة وحسابات الأجهزة</p>
-          </div>
-
-          {loginError && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-300 text-xs p-3 rounded-xl text-center">
-              {loginError}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs text-slate-400 mb-1.5">البريد الإلكتروني</label>
-              <input
-                type="email"
-                required
-                dir="ltr"
-                placeholder="admin@delta.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-left focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-slate-400 mb-1.5">كلمة المرور</label>
-              <input
-                type="password"
-                required
-                dir="ltr"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-left focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoggingIn}
-              className="w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-semibold text-sm transition"
-            >
-              {isLoggingIn ? "جاري الدخول..." : "تسجيل الدخول"}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      {/* الهيدر */}
-      <header className="bg-slate-9
+    setIsLoggingIn
