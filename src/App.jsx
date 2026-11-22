@@ -43,32 +43,41 @@ const SHOP_INFO = {
   whatsapp: "201111860871",
 };
 
+const DEVICE_TYPES = ["موبايل", "تابلت", "ساعة", "بلايستيشن", "لابتوب", "أخرى"];
+
+const INVOICE_TERMS = [
+  "يسري الضمان لمدة 14 يوماً من تاريخ الفاتورة على عيوب الصناعة فقط.",
+  "المحل غير مسؤول عن أي ضرائب أو رسوم حكومية أو ضريبية متعلقة بالجهاز بعد البيع.",
+  "الضمان لا يشمل سوء الاستخدام أو الكسر أو الخدش أو تعرض الجهاز للسوائل أو العبث به خارج المحل.",
+  "يجب الاحتفاظ بالفاتورة وحالة الجهاز كما تم استلامه وقت الفحص عند أي مراجعة خلال فترة الضمان.",
+];
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// الـ 20 جهاز المسحوبين من شيت Hessabat_ElAgheza_Abdo
+// الـ 20 جهاز المسحوبين من شيت Hessabat_ElAgheza_Abdo مع تحديد النوع
 const GOOGLE_SHEETS_DEVICES = [
-  { deviceName: "13 pro max", buyPrice: 29000, expectedSellPrice: 34000, sellPrice: 34000, status: "مباع", imei: "350000000000001", specs: "مستعمل - حالة ممتازة", notes: "" },
-  { deviceName: "TAB A6", buyPrice: 2000, expectedSellPrice: 2800, sellPrice: 0, status: "متاح", imei: "350000000000002", specs: "تابلت - حالة جيدة", notes: "" },
-  { deviceName: "13 pro max", buyPrice: 17300, expectedSellPrice: 21500, sellPrice: 0, status: "متاح", imei: "350000000000003", specs: "مستعمل - حالة جيدة", notes: "" },
-  { deviceName: "ip 7 p", buyPrice: 2800, expectedSellPrice: 3800, sellPrice: 0, status: "متاح", imei: "350000000000004", specs: "مستعمل - حالة جيدة", notes: "" },
-  { deviceName: "ipad mini 1", buyPrice: 1000, expectedSellPrice: 1600, sellPrice: 0, status: "متاح", imei: "350000000000005", specs: "آيباد ميني - حالة جيدة", notes: "" },
-  { deviceName: "ps4", buyPrice: 3700, expectedSellPrice: 5200, sellPrice: 0, status: "متاح", imei: "PS4-000006", specs: "بلايستيشن 4", notes: "" },
-  { deviceName: "xmax", buyPrice: 7700, expectedSellPrice: 8500, sellPrice: 8500, status: "مباع", imei: "350000000000007", specs: "مستعمل - حالة ممتازة", notes: "" },
-  { deviceName: "ps4", buyPrice: 7500, expectedSellPrice: 10000, sellPrice: 10000, status: "مباع", imei: "PS4-000008", specs: "بلايستيشن 4", notes: "" },
-  { deviceName: "Tab a7", buyPrice: 3100, expectedSellPrice: 4200, sellPrice: 0, status: "متاح", imei: "350000000000009", specs: "تابلت - حالة جيدة", notes: "" },
-  { deviceName: "A17", buyPrice: 8300, expectedSellPrice: 9850, sellPrice: 9850, status: "مباع", imei: "350000000000010", specs: "مستعمل - حالة ممتازة", notes: "" },
-  { deviceName: "Xr", buyPrice: 5500, expectedSellPrice: 6000, sellPrice: 6000, status: "مباع", imei: "350000000000011", specs: "مستعمل - حالة جيدة", notes: "" },
-  { deviceName: "Ps3", buyPrice: 1500, expectedSellPrice: 2300, sellPrice: 0, status: "متاح", imei: "PS3-000012", specs: "بلايستيشن 3", notes: "" },
-  { deviceName: "ip 14 pro max", buyPrice: 32700, expectedSellPrice: 37000, sellPrice: 0, status: "متاح", imei: "350000000000013", specs: "مستعمل - حالة ممتازة", notes: "" },
-  { deviceName: "ip 13", buyPrice: 20000, expectedSellPrice: 23500, sellPrice: 0, status: "متاح", imei: "350000000000014", specs: "مستعمل - حالة ممتازة", notes: "" },
-  { deviceName: "ip 11", buyPrice: 10500, expectedSellPrice: 11500, sellPrice: 11500, status: "مباع", imei: "350000000000015", specs: "مستعمل - حالة جيدة", notes: "" },
-  { deviceName: "ip 11", buyPrice: 9500, expectedSellPrice: 12000, sellPrice: 0, status: "متاح", imei: "350000000000016", specs: "مستعمل - حالة جيدة", notes: "" },
-  { deviceName: "ip 12", buyPrice: 8500, expectedSellPrice: 11500, sellPrice: 11500, status: "مباع", imei: "350000000000017", specs: "مستعمل - حالة ممتازة", notes: "" },
-  { deviceName: "IP11", buyPrice: 11500, expectedSellPrice: 13500, sellPrice: 0, status: "متاح", imei: "350000000000018", specs: "مستعمل - حالة ممتازة", notes: "" },
-  { deviceName: "IP 13 PRO MAX", buyPrice: 16000, expectedSellPrice: 20500, sellPrice: 0, status: "متاح", imei: "350000000000019", specs: "مستعمل - حالة جيدة", notes: "" },
-  { deviceName: "A50", buyPrice: 1500, expectedSellPrice: 2400, sellPrice: 0, status: "متاح", imei: "350000000000020", specs: "مستعمل - حالة جيدة", notes: "" },
+  { deviceName: "13 pro max", deviceType: "موبايل", buyPrice: 29000, expectedSellPrice: 34000, sellPrice: 34000, status: "مباع", imei: "350000000000001", specs: "مستعمل - حالة ممتازة", accessories: "", notes: "" },
+  { deviceName: "TAB A6", deviceType: "تابلت", buyPrice: 2000, expectedSellPrice: 2800, sellPrice: 0, status: "متاح", imei: "350000000000002", specs: "تابلت - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "13 pro max", deviceType: "موبايل", buyPrice: 17300, expectedSellPrice: 21500, sellPrice: 0, status: "متاح", imei: "350000000000003", specs: "مستعمل - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "ip 7 p", deviceType: "موبايل", buyPrice: 2800, expectedSellPrice: 3800, sellPrice: 0, status: "متاح", imei: "350000000000004", specs: "مستعمل - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "ipad mini 1", deviceType: "تابلت", buyPrice: 1000, expectedSellPrice: 1600, sellPrice: 0, status: "متاح", imei: "350000000000005", specs: "آيباد ميني - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "ps4", deviceType: "بلايستيشن", buyPrice: 3700, expectedSellPrice: 5200, sellPrice: 0, status: "متاح", imei: "PS4-000006", specs: "بلايستيشن 4", accessories: "", notes: "" },
+  { deviceName: "xmax", deviceType: "موبايل", buyPrice: 7700, expectedSellPrice: 8500, sellPrice: 8500, status: "مباع", imei: "350000000000007", specs: "مستعمل - حالة ممتازة", accessories: "", notes: "" },
+  { deviceName: "ps4", deviceType: "بلايستيشن", buyPrice: 7500, expectedSellPrice: 10000, sellPrice: 10000, status: "مباع", imei: "PS4-000008", specs: "بلايستيشن 4", accessories: "", notes: "" },
+  { deviceName: "Tab a7", deviceType: "تابلت", buyPrice: 3100, expectedSellPrice: 4200, sellPrice: 0, status: "متاح", imei: "350000000000009", specs: "تابلت - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "A17", deviceType: "موبايل", buyPrice: 8300, expectedSellPrice: 9850, sellPrice: 9850, status: "مباع", imei: "350000000000010", specs: "مستعمل - حالة ممتازة", accessories: "", notes: "" },
+  { deviceName: "Xr", deviceType: "موبايل", buyPrice: 5500, expectedSellPrice: 6000, sellPrice: 6000, status: "مباع", imei: "350000000000011", specs: "مستعمل - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "Ps3", deviceType: "بلايستيشن", buyPrice: 1500, expectedSellPrice: 2300, sellPrice: 0, status: "متاح", imei: "PS3-000012", specs: "بلايستيشن 3", accessories: "", notes: "" },
+  { deviceName: "ip 14 pro max", deviceType: "موبايل", buyPrice: 32700, expectedSellPrice: 37000, sellPrice: 0, status: "متاح", imei: "350000000000013", specs: "مستعمل - حالة ممتازة", accessories: "", notes: "" },
+  { deviceName: "ip 13", deviceType: "موبايل", buyPrice: 20000, expectedSellPrice: 23500, sellPrice: 0, status: "متاح", imei: "350000000000014", specs: "مستعمل - حالة ممتازة", accessories: "", notes: "" },
+  { deviceName: "ip 11", deviceType: "موبايل", buyPrice: 10500, expectedSellPrice: 11500, sellPrice: 11500, status: "مباع", imei: "350000000000015", specs: "مستعمل - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "ip 11", deviceType: "موبايل", buyPrice: 9500, expectedSellPrice: 12000, sellPrice: 0, status: "متاح", imei: "350000000000016", specs: "مستعمل - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "ip 12", deviceType: "موبايل", buyPrice: 8500, expectedSellPrice: 11500, sellPrice: 11500, status: "مباع", imei: "350000000000017", specs: "مستعمل - حالة ممتازة", accessories: "", notes: "" },
+  { deviceName: "IP11", deviceType: "موبايل", buyPrice: 11500, expectedSellPrice: 13500, sellPrice: 0, status: "متاح", imei: "350000000000018", specs: "مستعمل - حالة ممتازة", accessories: "", notes: "" },
+  { deviceName: "IP 13 PRO MAX", deviceType: "موبايل", buyPrice: 16000, expectedSellPrice: 20500, sellPrice: 0, status: "متاح", imei: "350000000000019", specs: "مستعمل - حالة جيدة", accessories: "", notes: "" },
+  { deviceName: "A50", deviceType: "موبايل", buyPrice: 1500, expectedSellPrice: 2400, sellPrice: 0, status: "متاح", imei: "350000000000020", specs: "مستعمل - حالة جيدة", accessories: "", notes: "" },
 ];
 
 // أيقونات SVG مدمجة
@@ -166,15 +175,41 @@ const IconTag = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
+const IconPrint = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <polyline points="6 9 6 2 18 2 18 9" />
+    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+    <rect x="6" y="14" width="12" height="8" />
+  </svg>
+);
+
+const IconLink = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [importing, setImporting] = useState(false);
+  const [copiedId, setCopiedId] = useState("");
   const fileInputRef = useRef(null);
 
-  // إظهار نافذة تسجيل الدخول للموظفين/الإدارة عند الضغط على الزرار
+  // قراءة معرف الجهاز من الرابط لو العميل فاتح رابط جهاز محدد (?device=...)
+  const [focusedDeviceId, setFocusedDeviceId] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("device") || "";
+    } catch {
+      return "";
+    }
+  });
+
+  // تسجيل الدخول
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -184,27 +219,37 @@ export default function App() {
   const isStaff = Boolean(user);
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
+  // تبويب الإدارة (الأجهزة / سجل الرقابة)
+  const [activeTab, setActiveTab] = useState("devices");
+
   // صندوق رأس المال الأصلي
   const [originalCapital, setOriginalCapital] = useState(DEFAULT_CAPITAL);
   const [isEditingCapital, setIsEditingCapital] = useState(false);
   const [capitalInput, setCapitalInput] = useState(String(DEFAULT_CAPITAL));
 
-  // بيانات الأجهزة
+  // بيانات الأجهزة وسجل الرقابة
   const [devices, setDevices] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
-  // نافذة «بيع» السريعة للسيلز والإدارة
+  // نافذة «بيع» السريعة
   const [sellingItem, setSellingItem] = useState(null);
   const [quickSellPrice, setQuickSellPrice] = useState("");
+  const [quickSellAccessories, setQuickSellAccessories] = useState("");
   const [quickSellNotes, setQuickSellNotes] = useState("");
   const [isSellingSaving, setIsSellingSaving] = useState(false);
+
+  // نافذة فاتورة البيع
+  const [invoiceItem, setInvoiceItem] = useState(null);
 
   // نافذة إضافة / تعديل جهاز
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({
     deviceName: "",
+    deviceType: "موبايل",
     imei: "",
     specs: "",
     buyPrice: "",
@@ -212,6 +257,7 @@ export default function App() {
     sellPrice: "",
     status: "متاح",
     clientOrSupplier: "عبدو",
+    accessories: "",
     notes: "",
   });
 
@@ -220,13 +266,15 @@ export default function App() {
       setUser(currentUser);
       if (currentUser) {
         setShowLoginModal(false);
+      } else {
+        setActiveTab("devices");
       }
       setAuthLoading(false);
     });
     return () => unsubscribeAuth();
   }, []);
 
-  // جلب الأجهزة (متاح للزوار لقراءة المتاح، وللموظفين/الإدارة لقراءة الكل)
+  // جلب الأجهزة
   useEffect(() => {
     setDataLoading(true);
     const devicesCollectionRef = collection(
@@ -256,7 +304,7 @@ export default function App() {
       },
       (err) => {
         console.error("Firestore error:", err);
-        setErrorMsg("تعذر قراءة البيانات. تأكد من تحديث Firestore Rules.");
+        setErrorMsg("تعذر قراءة البيانات. تأكد من نشر Firestore Rules.");
         setDataLoading(false);
       }
     );
@@ -264,9 +312,10 @@ export default function App() {
     return () => unsubscribeData();
   }, [user]);
 
-  // جلب إعدادات رأس المال للمدير فقط
+  // جلب رأس المال وسجل الرقابة للمدير
   useEffect(() => {
     if (!isAdmin) return;
+
     const settingsDocRef = doc(db, "artifacts", appId, "public", "data", "settings", "capital");
     const unsubscribeCapital = onSnapshot(
       settingsDocRef,
@@ -279,8 +328,40 @@ export default function App() {
       },
       () => {}
     );
-    return () => unsubscribeCapital();
+
+    const auditRef = collection(db, "artifacts", appId, "public", "data", "audit_logs");
+    const unsubscribeAudit = onSnapshot(
+      auditRef,
+      (snapshot) => {
+        const logs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        logs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setAuditLogs(logs);
+      },
+      () => {}
+    );
+
+    return () => {
+      unsubscribeCapital();
+      unsubscribeAudit();
+    };
   }, [isAdmin]);
+
+  // تسجيل حركة في سجل الرقابة
+  const recordAuditLog = async (actionType, deviceName, details = "") => {
+    if (!user?.email) return;
+    try {
+      const auditRef = collection(db, "artifacts", appId, "public", "data", "audit_logs");
+      await addDoc(auditRef, {
+        actorEmail: user.email,
+        actionType,
+        deviceName,
+        details,
+        createdAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error("Audit log error:", err);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -303,6 +384,29 @@ export default function App() {
     await signOut(auth);
   };
 
+  // نسخ رابط مباشر للجهاز المتاح
+  const handleCopyDeviceLink = async (deviceId) => {
+    const url = `${window.location.origin}${window.location.pathname}?device=${encodeURIComponent(deviceId)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(deviceId);
+      setTimeout(() => setCopiedId(""), 2000);
+    } catch {
+      window.prompt("انسخ رابط الجهاز:", url);
+    }
+  };
+
+  // فحص السيريال / IMEI المكرر
+  const duplicateImeiDevice = useMemo(() => {
+    const cleanImei = formData.imei.trim().toLowerCase();
+    if (!cleanImei) return null;
+    return devices.find(
+      (d) =>
+        d.id !== editingItem?.id &&
+        String(d.imei || "").trim().toLowerCase() === cleanImei
+    );
+  }, [formData.imei, devices, editingItem]);
+
   // فتح نافذة «بيع» السريعة
   const openQuickSellModal = (item) => {
     setSellingItem(item);
@@ -313,10 +417,11 @@ export default function App() {
         ? String(item.expectedSellPrice)
         : ""
     );
+    setQuickSellAccessories(item.accessories || "");
     setQuickSellNotes(item.notes || "");
   };
 
-  // تأكيد البيع السريع بضغطة واحدة
+  // تأكيد البيع السريع
   const handleConfirmQuickSell = async (e) => {
     e.preventDefault();
     if (!sellingItem) return;
@@ -329,13 +434,24 @@ export default function App() {
     setIsSellingSaving(true);
     try {
       const docRef = doc(db, "artifacts", appId, "public", "data", "devices", sellingItem.id);
-      await updateDoc(docRef, {
+      const updatedFields = {
         sellPrice: finalSell,
         status: "مباع",
-        notes: quickSellNotes,
+        accessories: quickSellAccessories.trim(),
+        notes: quickSellNotes.trim(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      await updateDoc(docRef, updatedFields);
+      await recordAuditLog(
+        "تسجيل بيع سريع",
+        sellingItem.deviceName,
+        `سعر البيع: ${finalSell.toLocaleString()} ج.م`
+      );
+      const soldSnapshot = { ...sellingItem, ...updatedFields };
       setSellingItem(null);
+      if (window.confirm("تم تسجيل البيع بنجاح! هل تريد فتح فاتورة البيع الآن؟")) {
+        setInvoiceItem(soldSnapshot);
+      }
     } catch (err) {
       console.error("Quick sell error:", err);
       alert("حدث خطأ أثناء تسجيل البيع.");
@@ -378,6 +494,7 @@ export default function App() {
         batch.set(newDocRef, {
           orderIndex: index + 1,
           deviceName: item.deviceName,
+          deviceType: item.deviceType || "موبايل",
           specs: item.specs || "",
           imei: item.imei || "",
           buyPrice: item.buyPrice || 0,
@@ -385,6 +502,7 @@ export default function App() {
           sellPrice: item.sellPrice || 0,
           status: item.status || "متاح",
           clientOrSupplier: "عبدو",
+          accessories: item.accessories || "",
           notes: item.notes || "",
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -392,6 +510,7 @@ export default function App() {
       });
 
       await batch.commit();
+      await recordAuditLog("استيراد شيت الحسابات", `${GOOGLE_SHEETS_DEVICES.length} جهاز`, "Hessabat_ElAgheza_Abdo");
       alert(`تم رفع ${GOOGLE_SHEETS_DEVICES.length} جهاز بنجاح!`);
     } catch (err) {
       console.error("Sync error:", err);
@@ -427,14 +546,16 @@ export default function App() {
         const newDocRef = doc(colRef);
         batch.set(newDocRef, {
           deviceName: cols[0] || "جهاز غير محدد",
-          specs: cols[1] || "",
-          imei: cols[2] || "",
-          buyPrice: isAdmin ? Number(cols[3]) || 0 : 0,
-          expectedSellPrice: Number(cols[4]) || 0,
-          sellPrice: Number(cols[5]) || 0,
-          status: cols[6] && ["متاح", "مباع", "صيانة"].includes(cols[6]) ? cols[6] : "متاح",
-          clientOrSupplier: cols[7] || "عبدو",
-          notes: cols[8] || "",
+          deviceType: DEVICE_TYPES.includes(cols[1]) ? cols[1] : "موبايل",
+          specs: cols[2] || "",
+          imei: cols[3] || "",
+          buyPrice: isAdmin ? Number(cols[4]) || 0 : 0,
+          expectedSellPrice: Number(cols[5]) || 0,
+          sellPrice: Number(cols[6]) || 0,
+          status: cols[7] && ["متاح", "مباع", "صيانة"].includes(cols[7]) ? cols[7] : "متاح",
+          clientOrSupplier: cols[8] || "عبدو",
+          accessories: cols[9] || "",
+          notes: cols[10] || "",
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
@@ -442,6 +563,7 @@ export default function App() {
       }
 
       await batch.commit();
+      await recordAuditLog("استيراد CSV", `${count} جهاز`, file.name);
       alert(`تم استيراد ${count} جهاز بنجاح!`);
     } catch (err) {
       console.error("CSV Import error:", err);
@@ -460,8 +582,8 @@ export default function App() {
     }
 
     const headers = isAdmin
-      ? ["م", "اسم الجهاز", "سعر الشراء", "سعر البيع المتوقع", "سعر البيع", "حالة الجهاز (مواصفات)", "صافي ربح الجهاز", "الحالة", "الطرف", "ملاحظات"]
-      : ["م", "اسم الجهاز", "سعر البيع المتوقع", "سعر البيع", "حالة الجهاز (مواصفات)", "الحالة", "ملاحظات"];
+      ? ["م", "اسم الجهاز", "النوع", "سعر الشراء", "سعر البيع المتوقع", "سعر البيع", "حالة الجهاز (مواصفات)", "IMEI", "صافي ربح الجهاز", "الحالة", "ملحقات / ضمان", "ملاحظات"]
+      : ["م", "اسم الجهاز", "النوع", "سعر البيع المتوقع", "سعر البيع", "حالة الجهاز (مواصفات)", "IMEI", "الحالة", "ملحقات / ضمان", "ملاحظات"];
 
     const escapeCSV = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
 
@@ -475,13 +597,15 @@ export default function App() {
         return [
           idx + 1,
           escapeCSV(item.deviceName),
+          escapeCSV(item.deviceType || "موبايل"),
           buy,
           expected || "",
           sell || "",
           escapeCSV(item.specs),
+          escapeCSV(item.imei),
           profit,
           escapeCSV(item.status),
-          escapeCSV(item.clientOrSupplier),
+          escapeCSV(item.accessories),
           escapeCSV(item.notes),
         ].join(",");
       }
@@ -489,10 +613,13 @@ export default function App() {
       return [
         idx + 1,
         escapeCSV(item.deviceName),
+        escapeCSV(item.deviceType || "موبايل"),
         expected || "",
         sell || "",
         escapeCSV(item.specs),
+        escapeCSV(item.imei),
         escapeCSV(item.status),
+        escapeCSV(item.accessories),
         escapeCSV(item.notes),
       ].join(",");
     });
@@ -547,16 +674,26 @@ export default function App() {
     };
   }, [devices, originalCapital]);
 
-  // الأجهزة المتاحة للعملاء (زوار غير مسجلين)
+  // الأجهزة المتاحة للعملاء (مع دعم التركيز على جهاز من الرابط)
   const customerDevices = useMemo(() => {
-    return devices.filter((item) => {
+    const list = devices.filter((item) => {
       const isAvailable = item.status === "متاح";
+      const matchesType = typeFilter === "all" || (item.deviceType || "موبايل") === typeFilter;
       const matchesSearch =
         item.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.specs?.toLowerCase().includes(searchTerm.toLowerCase());
-      return isAvailable && matchesSearch;
+      return isAvailable && matchesType && matchesSearch;
     });
-  }, [devices, searchTerm]);
+
+    if (!focusedDeviceId) return list;
+    return [...list].sort((a, b) => (a.id === focusedDeviceId ? -1 : b.id === focusedDeviceId ? 1 : 0));
+  }, [devices, searchTerm, typeFilter, focusedDeviceId]);
+
+  const focusedDeviceNotAvailable = useMemo(() => {
+    if (!focusedDeviceId || dataLoading) return false;
+    const found = devices.find((d) => d.id === focusedDeviceId);
+    return !found || found.status !== "متاح";
+  }, [focusedDeviceId, devices, dataLoading]);
 
   // الأجهزة للموظفين والإدارة
   const filteredDevices = useMemo(() => {
@@ -567,14 +704,16 @@ export default function App() {
         item.specs?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.notes?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesType = typeFilter === "all" || (item.deviceType || "موبايل") === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
     });
-  }, [devices, searchTerm, statusFilter]);
+  }, [devices, searchTerm, statusFilter, typeFilter]);
 
   const openAddModal = () => {
     setEditingItem(null);
     setFormData({
       deviceName: "",
+      deviceType: "موبايل",
       imei: "",
       specs: "",
       buyPrice: "",
@@ -582,6 +721,7 @@ export default function App() {
       sellPrice: "",
       status: "متاح",
       clientOrSupplier: "عبدو",
+      accessories: "",
       notes: "",
     });
     setIsFormOpen(true);
@@ -591,6 +731,7 @@ export default function App() {
     setEditingItem(item);
     setFormData({
       deviceName: item.deviceName || "",
+      deviceType: item.deviceType || "موبايل",
       imei: item.imei || "",
       specs: item.specs || item.storage || "",
       buyPrice: item.buyPrice ?? "",
@@ -598,14 +739,20 @@ export default function App() {
       sellPrice: item.sellPrice ?? "",
       status: item.status || "متاح",
       clientOrSupplier: item.clientOrSupplier || "عبدو",
+      accessories: item.accessories || "",
       notes: item.notes || "",
     });
     setIsFormOpen(true);
   };
 
-  // حفظ جهاز مع إلزامية كل الحقول ما عدا الملاحظات عند الإضافة الجديدة
+  // حفظ جهاز مع إلزامية كل الحقول ما عدا الملاحظات (والملحقات اختيارية) ومنع تكرار السيريال
   const handleSaveDevice = async (e) => {
     e.preventDefault();
+
+    if (duplicateImeiDevice) {
+      alert(`تنبيه: السيريال / IMEI (${formData.imei.trim()}) مسجل بالفعل على جهاز "${duplicateImeiDevice.deviceName}".`);
+      return;
+    }
 
     if (!formData.deviceName.trim() || !formData.specs.trim() || !formData.imei.trim()) {
       alert("من فضلك املأ اسم الجهاز، المواصفات، والسيريال IMEI.");
@@ -632,6 +779,7 @@ export default function App() {
 
     const payload = {
       deviceName: formData.deviceName.trim(),
+      deviceType: formData.deviceType || "موبايل",
       imei: formData.imei.trim(),
       specs: formData.specs.trim(),
       buyPrice: isAdmin
@@ -643,7 +791,8 @@ export default function App() {
       sellPrice: sellVal,
       status: finalStatus,
       clientOrSupplier: formData.clientOrSupplier || "عبدو",
-      notes: formData.notes.trim(), // اختياري
+      accessories: formData.accessories.trim(),
+      notes: formData.notes.trim(),
       updatedAt: serverTimestamp(),
     };
 
@@ -651,6 +800,11 @@ export default function App() {
       if (editingItem) {
         const docRef = doc(db, "artifacts", appId, "public", "data", "devices", editingItem.id);
         await updateDoc(docRef, payload);
+        await recordAuditLog(
+          "تعديل جهاز",
+          payload.deviceName,
+          `الحالة: ${payload.status} | بيع متوقع: ${expectedVal.toLocaleString()} | بيع فعلي: ${sellVal.toLocaleString()}`
+        );
       } else {
         const colRef = collection(db, "artifacts", appId, "public", "data", "devices");
         await addDoc(colRef, {
@@ -658,6 +812,11 @@ export default function App() {
           orderIndex: devices.length + 1,
           createdAt: serverTimestamp(),
         });
+        await recordAuditLog(
+          "إضافة جهاز جديد",
+          payload.deviceName,
+          `النوع: ${payload.deviceType} | سيريال: ${payload.imei}`
+        );
       }
       setIsFormOpen(false);
     } catch (err) {
@@ -666,15 +825,24 @@ export default function App() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (item) => {
     if (!isAdmin) return;
-    if (!window.confirm("هل أنت متأكد من حذف هذا الجهاز نهائياً؟")) return;
+    if (!window.confirm(`هل أنت متأكد من حذف "${item.deviceName}" نهائياً؟`)) return;
     try {
-      await deleteDoc(doc(db, "artifacts", appId, "public", "data", "devices", id));
+      await deleteDoc(doc(db, "artifacts", appId, "public", "data", "devices", item.id));
+      await recordAuditLog("حذف جهاز", item.deviceName, `سيريال: ${item.imei || "—"}`);
     } catch (err) {
       console.error("Delete error:", err);
       alert("فشل الحذف: الصلاحية متاحة لحساب الإدارة فقط.");
     }
+  };
+
+  const formatAuditDate = (ts) => {
+    if (!ts?.seconds) return "الآن";
+    return new Date(ts.seconds * 1000).toLocaleString("ar-EG", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
   };
 
   if (authLoading) {
@@ -687,7 +855,7 @@ export default function App() {
   }
 
   // ==========================================
-  // واجهة العملاء (زوار الموقع بدون تسجيل دخول)
+  // 1. واجهة العملاء (زوار الموقع بدون حساب)
   // ==========================================
   if (!isStaff) {
     return (
@@ -738,17 +906,51 @@ export default function App() {
             </div>
           </div>
 
-          <div className="relative">
-            <span className="text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2">
-              <IconSearch className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              placeholder="ابحث عن جهاز أو مواصفات..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl pr-11 pl-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
-            />
+          {focusedDeviceNotAvailable && (
+            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-200 px-4 py-3 rounded-xl text-sm flex flex-wrap items-center justify-between gap-2">
+              <span>الجهاز المطلوب من الرابط غير متاح حالياً أو تم بيعه. تصفح باقي الأجهزة المتاحة:</span>
+              <button
+                onClick={() => {
+                  setFocusedDeviceId("");
+                  window.history.replaceState({}, "", window.location.pathname);
+                }}
+                className="text-xs underline font-semibold text-amber-300"
+              >
+                عرض الكل
+              </button>
+            </div>
+          )}
+
+          {/* البحث وفلترة النوع للعملاء */}
+          <div className="space-y-3">
+            <div className="relative">
+              <span className="text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2">
+                <IconSearch className="w-5 h-5" />
+              </span>
+              <input
+                type="text"
+                placeholder="ابحث عن جهاز أو مواصفات..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl pr-11 pl-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {["all", ...DEVICE_TYPES].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setTypeFilter(type)}
+                  className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium border transition ${
+                    typeFilter === type
+                      ? "bg-cyan-600 border-cyan-500 text-white"
+                      : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {type === "all" ? "كل الأنواع" : type}
+                </button>
+              ))}
+            </div>
           </div>
 
           {dataLoading ? (
@@ -761,17 +963,27 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {customerDevices.map((item) => {
                 const displayPrice = Number(item.expectedSellPrice) || 0;
+                const isFocused = item.id === focusedDeviceId;
                 const waText = encodeURIComponent(
                   `مرحباً ${SHOP_INFO.name}، كنت أستفسر عن جهاز: ${item.deviceName} (${item.specs || ""}) بسعر ${displayPrice.toLocaleString()} ج.م`
                 );
                 return (
                   <div
                     key={item.id}
-                    className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-2xl p-5 flex flex-col justify-between gap-4 transition"
+                    className={`bg-slate-900 rounded-2xl p-5 flex flex-col justify-between gap-4 transition border ${
+                      isFocused
+                        ? "border-cyan-400 ring-2 ring-cyan-500/30"
+                        : "border-slate-800 hover:border-cyan-500/40"
+                    }`}
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-lg font-bold text-white">{item.deviceName}</h3>
+                        <div>
+                          <span className="inline-block text-[11px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md mb-1">
+                            {item.deviceType || "موبايل"}
+                          </span>
+                          <h3 className="text-lg font-bold text-white">{item.deviceName}</h3>
+                        </div>
                         <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           متاح
                         </span>
@@ -805,7 +1017,7 @@ export default function App() {
           )}
         </main>
 
-        {/* نافذة تسجيل الدخول للموظفين والإدارة */}
+        {/* نافذة تسجيل الدخول */}
         {showLoginModal && (
           <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-7 shadow-2xl space-y-5">
@@ -868,7 +1080,7 @@ export default function App() {
   }
 
   // ==========================================
-  // واجهة الموظفين (سيلز) والإدارة
+  // 2. واجهة الموظفين (سيلز) والإدارة
   // ==========================================
   return (
     <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 font-sans">
@@ -895,6 +1107,27 @@ export default function App() {
               <IconShield className="w-4 h-4" />
               <span>{isAdmin ? "مدير النظام" : "موظف مبيعات"}</span>
             </div>
+
+            {isAdmin && (
+              <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs">
+                <button
+                  onClick={() => setActiveTab("devices")}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition ${
+                    activeTab === "devices" ? "bg-cyan-600 text-white" : "text-slate-300 hover:text-white"
+                  }`}
+                >
+                  الأجهزة
+                </button>
+                <button
+                  onClick={() => setActiveTab("audit")}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition ${
+                    activeTab === "audit" ? "bg-amber-600 text-white" : "text-slate-300 hover:text-white"
+                  }`}
+                >
+                  سجل الرقابة ({auditLogs.length})
+                </button>
+              </div>
+            )}
 
             {isAdmin && devices.length === 0 && (
               <button
@@ -1072,165 +1305,255 @@ export default function App() {
           </div>
         )}
 
-        {/* شريط البحث والفلترة */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <span className="text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2">
-              <IconSearch className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              placeholder="ابحث باسم الجهاز، المواصفات، السيريال، أو الملاحظات..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl pr-11 pl-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            {["all", "متاح", "مباع", "صيانة"].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition ${
-                  statusFilter === status
-                    ? "bg-cyan-600 border-cyan-500 text-white"
-                    : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
-                }`}
-              >
-                {status === "all" ? "الكل" : status}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* جدول الأجهزة */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          {dataLoading ? (
-            <div className="py-12 text-center text-slate-400 text-sm">جاري تحميل الأجهزة...</div>
-          ) : (
+        {/* تبويب سجل الرقابة للمدير */}
+        {isAdmin && activeTab === "audit" ? (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h2 className="text-base font-bold text-amber-300">سجل رقابة حركات الموظفين والإدارة</h2>
+              <span className="text-xs text-slate-400">آخر {auditLogs.length} حركة</span>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-right text-sm">
                 <thead className="bg-slate-950/60 text-slate-400 border-b border-slate-800">
                   <tr>
-                    <th className="py-3.5 px-3 font-medium w-12 text-center">م</th>
-                    <th className="py-3.5 px-4 font-medium">اسم الجهاز</th>
-                    {isAdmin && <th className="py-3.5 px-4 font-medium">سعر الشراء</th>}
-                    <th className="py-3.5 px-4 font-medium">سعر البيع المتوقع</th>
-                    <th className="py-3.5 px-4 font-medium">سعر البيع</th>
-                    <th className="py-3.5 px-4 font-medium">حالة الجهاز (مواصفات)</th>
-                    {isAdmin && <th className="py-3.5 px-4 font-medium">صافي ربح الجهاز</th>}
-                    <th className="py-3.5 px-4 font-medium">الحالة</th>
-                    <th className="py-3.5 px-4 font-medium">ملاحظات</th>
-                    <th className="py-3.5 px-4 font-medium text-center">إجراءات</th>
+                    <th className="py-3 px-4 font-medium">المستخدم</th>
+                    <th className="py-3 px-4 font-medium">الحركة</th>
+                    <th className="py-3 px-4 font-medium">الجهاز</th>
+                    <th className="py-3 px-4 font-medium">التفاصيل</th>
+                    <th className="py-3 px-4 font-medium">الوقت والتاريخ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
-                  {filteredDevices.length === 0 ? (
+                  {auditLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={isAdmin ? 10 : 8} className="py-12 text-center text-slate-500">
-                        لا توجد أجهزة مسجلة بعد. اضغط على «إضافة جهاز» أو «استيراد داتا الشيت (20 جهاز)».
+                      <td colSpan={5} className="py-10 text-center text-slate-500">
+                        لا توجد حركات مسجلة في سجل الرقابة حتى الآن.
                       </td>
                     </tr>
                   ) : (
-                    filteredDevices.map((item, idx) => {
-                      const profit = (Number(item.sellPrice) || 0) - (Number(item.buyPrice) || 0);
-                      return (
-                        <tr key={item.id} className="hover:bg-slate-800/40 transition">
-                          <td className="py-3.5 px-3 text-center text-slate-500 font-mono text-xs">
-                            {idx + 1}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <div className="font-semibold text-white">{item.deviceName}</div>
-                            {item.imei && (
-                              <div className="text-[11px] font-mono text-slate-500">IMEI: {item.imei}</div>
-                            )}
-                          </td>
-                          {isAdmin && (
-                            <td className="py-3.5 px-4 text-slate-300">
-                              {Number(item.buyPrice || 0).toLocaleString()} ج.م
-                            </td>
-                          )}
-                          <td className="py-3.5 px-4 text-slate-400">
-                            {Number(item.expectedSellPrice) > 0
-                              ? `${Number(item.expectedSellPrice).toLocaleString()} ج.م`
-                              : "—"}
-                          </td>
-                          <td className="py-3.5 px-4 font-semibold text-white">
-                            {Number(item.sellPrice) > 0
-                              ? `${Number(item.sellPrice).toLocaleString()} ج.م`
-                              : "—"}
-                          </td>
-                          <td className="py-3.5 px-4 text-slate-300 text-xs">
-                            {item.specs || item.storage || "—"}
-                          </td>
-                          {isAdmin && (
-                            <td
-                              className={`py-3.5 px-4 font-semibold ${
-                                item.status === "مباع"
-                                  ? profit >= 0
-                                    ? "text-emerald-400"
-                                    : "text-red-400"
-                                  : "text-slate-500"
-                              }`}
-                            >
-                              {item.status === "مباع" ? `${profit.toLocaleString()} ج.م` : "—"}
-                            </td>
-                          )}
-                          <td className="py-3.5 px-4">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                                item.status === "متاح"
-                                  ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
-                                  : item.status === "مباع"
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                  : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-slate-400 text-xs">
-                            {item.notes || "—"}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <div className="flex items-center justify-center gap-1.5">
-                              {item.status === "متاح" && (
-                                <button
-                                  onClick={() => openQuickSellModal(item)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition"
-                                >
-                                  <IconTag className="w-3.5 h-3.5" />
-                                  <span>بيع</span>
-                                </button>
-                              )}
-                              <button
-                                onClick={() => openEditModal(item)}
-                                title="تعديل"
-                                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
-                              >
-                                <IconEdit className="w-4 h-4" />
-                              </button>
-                              {isAdmin && (
-                                <button
-                                  onClick={() => handleDelete(item.id)}
-                                  title="حذف"
-                                  className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition"
-                                >
-                                  <IconTrash className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    auditLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-800/40">
+                        <td className="py-3 px-4 font-mono text-xs text-cyan-300">{log.actorEmail}</td>
+                        <td className="py-3 px-4 font-semibold text-white">{log.actionType}</td>
+                        <td className="py-3 px-4 text-slate-200">{log.deviceName}</td>
+                        <td className="py-3 px-4 text-xs text-slate-400">{log.details || "—"}</td>
+                        <td className="py-3 px-4 text-xs text-slate-400">{formatAuditDate(log.createdAt)}</td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <>
+            {/* شريط البحث والفلترة (الحالة + النوع) */}
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <span className="text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2">
+                    <IconSearch className="w-5 h-5" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="ابحث باسم الجهاز، المواصفات، السيريال، أو الملاحظات..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl pr-11 pl-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {["all", "متاح", "مباع", "صيانة"].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setStatusFilter(status)}
+                      className={`px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium border transition ${
+                        statusFilter === status
+                          ? "bg-cyan-600 border-cyan-500 text-white"
+                          : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {status === "all" ? "الكل" : status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-slate-500 ml-1">النوع:</span>
+                {["all", ...DEVICE_TYPES].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setTypeFilter(type)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition ${
+                      typeFilter === type
+                        ? "bg-slate-700 border-cyan-500/60 text-cyan-300"
+                        : "bg-slate-900/70 border-slate-800 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {type === "all" ? "الكل" : type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* جدول الأجهزة */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+              {dataLoading ? (
+                <div className="py-12 text-center text-slate-400 text-sm">جاري تحميل الأجهزة...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-sm">
+                    <thead className="bg-slate-950/60 text-slate-400 border-b border-slate-800">
+                      <tr>
+                        <th className="py-3.5 px-3 font-medium w-12 text-center">م</th>
+                        <th className="py-3.5 px-4 font-medium">الجهاز والنوع</th>
+                        {isAdmin && <th className="py-3.5 px-4 font-medium">سعر الشراء</th>}
+                        <th className="py-3.5 px-4 font-medium">سعر البيع المتوقع</th>
+                        <th className="py-3.5 px-4 font-medium">سعر البيع</th>
+                        <th className="py-3.5 px-4 font-medium">حالة الجهاز (مواصفات)</th>
+                        {isAdmin && <th className="py-3.5 px-4 font-medium">صافي ربح الجهاز</th>}
+                        <th className="py-3.5 px-4 font-medium">الحالة</th>
+                        <th className="py-3.5 px-4 font-medium">ملاحظات</th>
+                        <th className="py-3.5 px-4 font-medium text-center">إجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/70">
+                      {filteredDevices.length === 0 ? (
+                        <tr>
+                          <td colSpan={isAdmin ? 10 : 8} className="py-12 text-center text-slate-500">
+                            لا توجد أجهزة مطابقة حالياً.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredDevices.map((item, idx) => {
+                          const profit = (Number(item.sellPrice) || 0) - (Number(item.buyPrice) || 0);
+                          return (
+                            <tr key={item.id} className="hover:bg-slate-800/40 transition">
+                              <td className="py-3.5 px-3 text-center text-slate-500 font-mono text-xs">
+                                {idx + 1}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-white">{item.deviceName}</span>
+                                  <span className="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                    {item.deviceType || "موبايل"}
+                                  </span>
+                                </div>
+                                {item.imei && (
+                                  <div className="text-[11px] font-mono text-slate-500">IMEI: {item.imei}</div>
+                                )}
+                              </td>
+                              {isAdmin && (
+                                <td className="py-3.5 px-4 text-slate-300">
+                                  {Number(item.buyPrice || 0).toLocaleString()} ج.م
+                                </td>
+                              )}
+                              <td className="py-3.5 px-4 text-slate-400">
+                                {Number(item.expectedSellPrice) > 0
+                                  ? `${Number(item.expectedSellPrice).toLocaleString()} ج.م`
+                                  : "—"}
+                              </td>
+                              <td className="py-3.5 px-4 font-semibold text-white">
+                                {Number(item.sellPrice) > 0
+                                  ? `${Number(item.sellPrice).toLocaleString()} ج.م`
+                                  : "—"}
+                              </td>
+                              <td className="py-3.5 px-4 text-slate-300 text-xs">
+                                {item.specs || item.storage || "—"}
+                              </td>
+                              {isAdmin && (
+                                <td
+                                  className={`py-3.5 px-4 font-semibold ${
+                                    item.status === "مباع"
+                                      ? profit >= 0
+                                        ? "text-emerald-400"
+                                        : "text-red-400"
+                                      : "text-slate-500"
+                                  }`}
+                                >
+                                  {item.status === "مباع" ? `${profit.toLocaleString()} ج.م` : "—"}
+                                </td>
+                              )}
+                              <td className="py-3.5 px-4">
+                                <span
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                                    item.status === "متاح"
+                                      ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                                      : item.status === "مباع"
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                      : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                  }`}
+                                >
+                                  {item.status}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-slate-400 text-xs">
+                                {item.notes || "—"}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  {item.status === "متاح" && (
+                                    <>
+                                      <button
+                                        onClick={() => openQuickSellModal(item)}
+                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition"
+                                      >
+                                        <IconTag className="w-3.5 h-3.5" />
+                                        <span>بيع</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handleCopyDeviceLink(item.id)}
+                                        title="نسخ رابط الجهاز للعميل"
+                                        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs border border-slate-700 transition"
+                                      >
+                                        <IconLink className="w-3.5 h-3.5" />
+                                        <span>{copiedId === item.id ? "تم النسخ" : "رابط"}</span>
+                                      </button>
+                                    </>
+                                  )}
+
+                                  {item.status === "مباع" && (
+                                    <button
+                                      onClick={() => setInvoiceItem(item)}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition"
+                                    >
+                                      <IconPrint className="w-3.5 h-3.5" />
+                                      <span>فاتورة</span>
+                                    </button>
+                                  )}
+
+                                  <button
+                                    onClick={() => openEditModal(item)}
+                                    title="تعديل"
+                                    className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                                  >
+                                    <IconEdit className="w-4 h-4" />
+                                  </button>
+
+                                  {isAdmin && (
+                                    <button
+                                      onClick={() => handleDelete(item)}
+                                      title="حذف"
+                                      className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition"
+                                    >
+                                      <IconTrash className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </main>
 
       {/* نافذة «بيع» السريعة */}
@@ -1240,7 +1563,9 @@ export default function App() {
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
                 <h2 className="text-lg font-bold text-white">تسجيل بيع جهاز</h2>
-                <p className="text-xs text-emerald-400">{sellingItem.deviceName}</p>
+                <p className="text-xs text-emerald-400">
+                  {sellingItem.deviceName} • {sellingItem.deviceType || "موبايل"}
+                </p>
               </div>
               <button
                 onClick={() => setSellingItem(null)}
@@ -1261,6 +1586,17 @@ export default function App() {
                   value={quickSellPrice}
                   onChange={(e) => setQuickSellPrice(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-base font-bold text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">ملحقات / ضمان (للفاتورة)</label>
+                <input
+                  type="text"
+                  placeholder="مثال: كرتونة / شاحن / ضمان 14 يوم"
+                  value={quickSellAccessories}
+                  onChange={(e) => setQuickSellAccessories(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white"
                 />
               </div>
 
@@ -1299,7 +1635,7 @@ export default function App() {
       {/* نافذة إضافة / تعديل جهاز */}
       {isFormOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h2 className="text-lg font-bold text-white">
                 {editingItem ? "تعديل بيانات الجهاز" : "تسجيل جهاز جديد"}
@@ -1325,17 +1661,34 @@ export default function App() {
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">حالة الجهاز (مواصفات) *</label>
-                  <input
-                    type="text"
+                  <label className="block text-xs text-slate-400 mb-1">نوع الجهاز *</label>
+                  <select
                     required
-                    placeholder="مثال: 256GB بطارية 89% كسر زيرو"
-                    value={formData.specs}
-                    onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
+                    value={formData.deviceType}
+                    onChange={(e) => setFormData({ ...formData, deviceType: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
-                  />
+                  >
+                    {DEVICE_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">حالة الجهاز (مواصفات) *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="مثال: 256GB بطارية 89% كسر زيرو"
+                  value={formData.specs}
+                  onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1381,8 +1734,15 @@ export default function App() {
                     placeholder="السيريال أو IMEI"
                     value={formData.imei}
                     onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono"
+                    className={`w-full bg-slate-950 border rounded-xl px-3 py-2 text-sm text-white font-mono ${
+                      duplicateImeiDevice ? "border-red-500" : "border-slate-800"
+                    }`}
                   />
+                  {duplicateImeiDevice && (
+                    <p className="text-[11px] text-red-400 mt-1">
+                      تنبيه: هذا السيريال/IMEI مسجل بالفعل على "{duplicateImeiDevice.deviceName}"!
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">حالة البيع *</label>
@@ -1397,6 +1757,17 @@ export default function App() {
                     <option value="صيانة">صيانة</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">ملحقات / ضمان (اختياري)</label>
+                <input
+                  type="text"
+                  placeholder="مثال: كرتونة / شاحن / ضمان 14 يوم"
+                  value={formData.accessories}
+                  onChange={(e) => setFormData({ ...formData, accessories: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
+                />
               </div>
 
               <div>
@@ -1426,6 +1797,85 @@ export default function App() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* نافذة فاتورة البيع وشروط الضمان (14 يوم وعدم المسؤولية عن الضرائب) */}
+      {invoiceItem && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white text-slate-900 rounded-2xl w-full max-w-xl p-6 md:p-8 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4">
+              <div>
+                <h2 className="text-2xl font-extrabold tracking-wide text-slate-950">{SHOP_INFO.name}</h2>
+                <p className="text-xs text-slate-600 mt-1">{SHOP_INFO.address}</p>
+                <p className="text-xs text-slate-600 mt-0.5" dir="ltr">
+                  {SHOP_INFO.phones.join("  •  ")}
+                </p>
+              </div>
+              <div className="text-left">
+                <span className="inline-block bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-lg">
+                  فاتورة بيع
+                </span>
+                <p className="text-xs text-slate-500 mt-1.5">
+                  التاريخ: {new Date().toLocaleDateString("ar-EG")}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-slate-500">الجهاز:</span>
+                <span className="font-bold text-slate-900">
+                  {invoiceItem.deviceName} ({invoiceItem.deviceType || "موبايل"})
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">المواصفات:</span>
+                <span className="font-medium text-slate-800">{invoiceItem.specs || "—"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">السيريال / IMEI:</span>
+                <span className="font-mono text-xs text-slate-800">{invoiceItem.imei || "—"}</span>
+              </div>
+              {invoiceItem.accessories && (
+                <div className="flex justify-between">
+                  <span className="text-slate-500">الملحقات:</span>
+                  <span className="font-medium text-slate-800">{invoiceItem.accessories}</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-slate-200 pt-2.5 text-base">
+                <span className="font-bold text-slate-900">الإجمالي المطلوب:</span>
+                <span className="font-extrabold text-slate-950">
+                  {Number(invoiceItem.sellPrice || 0).toLocaleString()} ج.م
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-1.5">
+              <h3 className="text-xs font-bold text-slate-900">شروط الضمان وإخلاء المسؤولية:</h3>
+              <ul className="list-disc pr-4 space-y-1 text-xs text-slate-700 leading-relaxed">
+                {INVOICE_TERMS.map((term, i) => (
+                  <li key={i}>{term}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 gap-2">
+              <button
+                onClick={() => setInvoiceItem(null)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-semibold"
+              >
+                إغلاق
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold"
+              >
+                <IconPrint className="w-4 h-4" />
+                <span>طباعة الفاتورة</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
