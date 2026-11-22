@@ -16,6 +16,7 @@ import {
   onSnapshot,
   serverTimestamp,
   writeBatch,
+  setDoc,
 } from 'firebase/firestore';
 
 // ==========================================
@@ -33,10 +34,35 @@ const firebaseConfig = {
 
 const appId = "delta-tech-app";
 const ADMIN_EMAIL = "admin@delta.com";
+const DEFAULT_CAPITAL = 175000; // رأس المال الأصلي في الشيت
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// الـ 20 جهاز المسحوبين من شيت Hessabat_ElAgheza_Abdo بالكامل
+const GOOGLE_SHEETS_DEVICES = [
+  { deviceName: "13 pro max", buyPrice: 29000, expectedSellPrice: 0, sellPrice: 34000, status: "مباع", specs: "", notes: "" },
+  { deviceName: "TAB A6", buyPrice: 2000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "13 pro max", buyPrice: 17300, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "ip 7 p", buyPrice: 2800, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "ipad mini 1", buyPrice: 1000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "ps4", buyPrice: 3700, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "xmax", buyPrice: 7700, expectedSellPrice: 0, sellPrice: 8500, status: "مباع", specs: "", notes: "" },
+  { deviceName: "ps4", buyPrice: 7500, expectedSellPrice: 0, sellPrice: 10000, status: "مباع", specs: "", notes: "" },
+  { deviceName: "Tab a7", buyPrice: 3100, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "A17", buyPrice: 8300, expectedSellPrice: 0, sellPrice: 9850, status: "مباع", specs: "", notes: "" },
+  { deviceName: "Xr", buyPrice: 5500, expectedSellPrice: 0, sellPrice: 6000, status: "مباع", specs: "", notes: "" },
+  { deviceName: "Ps3", buyPrice: 1500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "ip 14 pro max", buyPrice: 32700, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "ip 13", buyPrice: 20000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "ip 11", buyPrice: 10500, expectedSellPrice: 0, sellPrice: 11500, status: "مباع", specs: "", notes: "" },
+  { deviceName: "ip 11", buyPrice: 9500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "ip 12", buyPrice: 8500, expectedSellPrice: 0, sellPrice: 11500, status: "مباع", specs: "", notes: "" },
+  { deviceName: "IP11", buyPrice: 11500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "IP 13 PRO MAX", buyPrice: 16000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "A50", buyPrice: 1500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+];
 
 // أيقونات SVG مدمجة
 const IconPhone = ({ className = "w-6 h-6" }) => (
@@ -50,6 +76,14 @@ const IconPlus = ({ className = "w-4 h-4" }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <line x1="12" y1="5" x2="12" y2="19" />
     <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const IconDatabase = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <ellipse cx="12" cy="5" rx="9" ry="3" />
+    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
   </svg>
 );
 
@@ -134,6 +168,11 @@ export default function App() {
 
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
+  // صندوق رأس المال الأصلي
+  const [originalCapital, setOriginalCapital] = useState(DEFAULT_CAPITAL);
+  const [isEditingCapital, setIsEditingCapital] = useState(false);
+  const [capitalInput, setCapitalInput] = useState(String(DEFAULT_CAPITAL));
+
   // بيانات الأجهزة
   const [devices, setDevices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -145,12 +184,12 @@ export default function App() {
   const [formData, setFormData] = useState({
     deviceName: "",
     imei: "",
-    storage: "",
-    condition: "مستعمل كسر زيرو",
+    specs: "",
     buyPrice: "",
+    expectedSellPrice: "",
     sellPrice: "",
     status: "متاح",
-    clientOrSupplier: "",
+    clientOrSupplier: "عبدو",
     notes: "",
   });
 
@@ -162,6 +201,7 @@ export default function App() {
     return () => unsubscribeAuth();
   }, []);
 
+  // جلب الأجهزة وإعدادات رأس المال من Firestore
   useEffect(() => {
     if (!user) {
       setDevices([]);
@@ -185,7 +225,8 @@ export default function App() {
           id: docSnap.id,
           ...docSnap.data(),
         }));
-        list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        // الحفاظ على ترتيب الإدخال أو الأحدث
+        list.sort((a, b) => (a.orderIndex ?? 999) - (b.orderIndex ?? 999) || (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setDevices(list);
         setDataLoading(false);
         setErrorMsg("");
@@ -197,7 +238,24 @@ export default function App() {
       }
     );
 
-    return () => unsubscribeData();
+    // قراءة رأس المال المحفوظ إن وجد
+    const settingsDocRef = doc(db, "artifacts", appId, "public", "data", "settings", "capital");
+    const unsubscribeCapital = onSnapshot(
+      settingsDocRef,
+      (docSnap) => {
+        if (docSnap.exists() && docSnap.data().originalCapital !== undefined) {
+          const val = Number(docSnap.data().originalCapital) || DEFAULT_CAPITAL;
+          setOriginalCapital(val);
+          setCapitalInput(String(val));
+        }
+      },
+      () => {}
+    );
+
+    return () => {
+      unsubscribeData();
+      unsubscribeCapital();
+    };
   }, [user]);
 
   const handleLogin = async (e) => {
@@ -220,7 +278,65 @@ export default function App() {
     await signOut(auth);
   };
 
-  // استيراد البيانات من ملف CSV
+  // حفظ تعديل رأس المال الأصلي
+  const handleSaveCapital = async (e) => {
+    e.preventDefault();
+    if (!isAdmin) return;
+    const newVal = Number(capitalInput) || 0;
+    try {
+      const settingsDocRef = doc(db, "artifacts", appId, "public", "data", "settings", "capital");
+      await setDoc(settingsDocRef, { originalCapital: newVal, updatedAt: serverTimestamp() }, { merge: true });
+      setOriginalCapital(newVal);
+      setIsEditingCapital(false);
+    } catch (err) {
+      console.error("Error saving capital:", err);
+      // لو القواعد لسه متحدثتش لـ settings، نحفظه محلياً مؤقتاً
+      setOriginalCapital(newVal);
+      setIsEditingCapital(false);
+    }
+  };
+
+  // رفع بيانات الـ 20 جهاز من شيت الحسابات
+  const handleSyncGoogleSheetData = async () => {
+    if (!isAdmin) return;
+    if (!window.confirm(`هل تريد استيراد الـ ${GOOGLE_SHEETS_DEVICES.length} جهاز من شيت الحسابات الآن؟`)) {
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const batch = writeBatch(db);
+      const colRef = collection(db, "artifacts", appId, "public", "data", "devices");
+
+      GOOGLE_SHEETS_DEVICES.forEach((item, index) => {
+        const newDocRef = doc(colRef);
+        batch.set(newDocRef, {
+          orderIndex: index + 1,
+          deviceName: item.deviceName,
+          specs: item.specs || "",
+          imei: "",
+          buyPrice: item.buyPrice || 0,
+          expectedSellPrice: item.expectedSellPrice || 0,
+          sellPrice: item.sellPrice || 0,
+          status: item.status || "متاح",
+          clientOrSupplier: "عبدو",
+          notes: item.notes || "",
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      });
+
+      await batch.commit();
+      alert(`تم رفع ${GOOGLE_SHEETS_DEVICES.length} جهاز بنجاح!`);
+    } catch (err) {
+      console.error("Sync error:", err);
+      alert("حدث خطأ أثناء رفع البيانات. تأكد من إعدادات Firestore Rules.");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  // استيراد البيانات من ملف CSV خارجي
   const handleCSVImport = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -246,14 +362,14 @@ export default function App() {
         const newDocRef = doc(colRef);
         batch.set(newDocRef, {
           deviceName: cols[0] || "جهاز غير محدد",
-          storage: cols[1] || "",
+          specs: cols[1] || "",
           imei: cols[2] || "",
           buyPrice: isAdmin ? Number(cols[3]) || 0 : 0,
-          sellPrice: Number(cols[4]) || 0,
-          status: cols[5] && ["متاح", "مباع", "صيانة"].includes(cols[5]) ? cols[5] : "متاح",
-          clientOrSupplier: cols[6] || "",
-          notes: cols[7] || "",
-          condition: "مستعمل كسر زيرو",
+          expectedSellPrice: Number(cols[4]) || 0,
+          sellPrice: Number(cols[5]) || 0,
+          status: cols[6] && ["متاح", "مباع", "صيانة"].includes(cols[6]) ? cols[6] : "متاح",
+          clientOrSupplier: cols[7] || "عبدو",
+          notes: cols[8] || "",
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
@@ -279,23 +395,25 @@ export default function App() {
     }
 
     const headers = isAdmin
-      ? ["اسم الجهاز", "المساحة / اللون", "IMEI", "سعر الشراء", "سعر البيع", "الربح", "الحالة", "العميل / المورد", "ملاحظات"]
-      : ["اسم الجهاز", "المساحة / اللون", "IMEI", "سعر البيع", "الحالة", "العميل / المورد", "ملاحظات"];
+      ? ["م", "اسم الجهاز", "سعر الشراء", "سعر البيع المتوقع", "سعر البيع", "حالة الجهاز (مواصفات)", "صافي ربح الجهاز", "الحالة", "الطرف", "ملاحظات"]
+      : ["م", "اسم الجهاز", "سعر البيع المتوقع", "سعر البيع", "حالة الجهاز (مواصفات)", "الحالة", "ملاحظات"];
 
     const escapeCSV = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
 
-    const rows = devices.map((item) => {
+    const rows = devices.map((item, idx) => {
       const buy = Number(item.buyPrice) || 0;
+      const expected = Number(item.expectedSellPrice) || 0;
       const sell = Number(item.sellPrice) || 0;
-      const profit = sell - buy;
+      const profit = item.status === "مباع" ? sell - buy : 0;
 
       if (isAdmin) {
         return [
+          idx + 1,
           escapeCSV(item.deviceName),
-          escapeCSV(item.storage),
-          escapeCSV(item.imei),
           buy,
-          sell,
+          expected || "",
+          sell || "",
+          escapeCSV(item.specs),
           profit,
           escapeCSV(item.status),
           escapeCSV(item.clientOrSupplier),
@@ -304,12 +422,12 @@ export default function App() {
       }
 
       return [
+        idx + 1,
         escapeCSV(item.deviceName),
-        escapeCSV(item.storage),
-        escapeCSV(item.imei),
-        sell,
+        expected || "",
+        sell || "",
+        escapeCSV(item.specs),
         escapeCSV(item.status),
-        escapeCSV(item.clientOrSupplier),
         escapeCSV(item.notes),
       ].join(",");
     });
@@ -321,35 +439,66 @@ export default function App() {
     const today = new Date().toISOString().slice(0, 10);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `DELTA_TECHNOLOGY_Backup_${today}.csv`);
+    link.setAttribute("download", `DELTA_TECHNOLOGY_Hessabat_${today}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
+  // حساب كل إحصائيات ومعادلات الشيت بدقة
   const stats = useMemo(() => {
     const totalDevices = devices.length;
-    const availableCount = devices.filter((d) => d.status === "متاح").length;
+    const availableDevices = devices.filter((d) => d.status === "متاح" || d.status === "صيانة");
+    const availableCount = availableDevices.length;
+
     const soldDevices = devices.filter((d) => d.status === "مباع");
+    const soldCount = soldDevices.length;
+
+    // إجمالي المبيعات
     const totalRevenue = soldDevices.reduce((sum, d) => sum + (Number(d.sellPrice) || 0), 0);
+
+    // إجمالي أرباح المحل (صافي)
     const totalProfit = soldDevices.reduce(
       (sum, d) => sum + ((Number(d.sellPrice) || 0) - (Number(d.buyPrice) || 0)),
       0
     );
-    const inventoryCost = devices
-      .filter((d) => d.status === "متاح")
-      .reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0);
 
-    return { totalDevices, availableCount, totalRevenue, totalProfit, inventoryCost };
-  }, [devices]);
+    // تقسيم الأرباح حسب الشيت: 40% عبدو / 60% الإدارة والمحل
+    const abdoShare = totalProfit * 0.4;
+    const adminShare = totalProfit * 0.6;
+
+    // قيمة البضاعة الحالية (شراء)
+    const inventoryCost = availableDevices.reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0);
+
+    // الكاش المتبقي من رأس المال الأصلي (175,000 - 122,600 = 52,400)
+    const remainingCapitalCash = originalCapital - inventoryCost;
+
+    // إجمالي الكاش الفعلي في الدرج (الكاش المتبقي من رأس المال + صافي الأرباح المحققة)
+    const totalCashInHand = remainingCapitalCash + totalProfit;
+
+    return {
+      totalDevices,
+      availableCount,
+      soldCount,
+      totalRevenue,
+      totalProfit,
+      abdoShare,
+      adminShare,
+      inventoryCost,
+      remainingCapitalCash,
+      totalCashInHand,
+    };
+  }, [devices, originalCapital]);
 
   const filteredDevices = useMemo(() => {
     return devices.filter((item) => {
       const matchesSearch =
         item.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.imei?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.clientOrSupplier?.toLowerCase().includes(searchTerm.toLowerCase());
+        item.specs?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.clientOrSupplier?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.notes?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -360,12 +509,12 @@ export default function App() {
     setFormData({
       deviceName: "",
       imei: "",
-      storage: "",
-      condition: "مستعمل كسر زيرو",
+      specs: "",
       buyPrice: "",
+      expectedSellPrice: "",
       sellPrice: "",
       status: "متاح",
-      clientOrSupplier: "",
+      clientOrSupplier: "عبدو",
       notes: "",
     });
     setIsFormOpen(true);
@@ -376,12 +525,12 @@ export default function App() {
     setFormData({
       deviceName: item.deviceName || "",
       imei: item.imei || "",
-      storage: item.storage || "",
-      condition: item.condition || "مستعمل كسر زيرو",
+      specs: item.specs || item.storage || "",
       buyPrice: item.buyPrice || "",
+      expectedSellPrice: item.expectedSellPrice || "",
       sellPrice: item.sellPrice || "",
       status: item.status || "متاح",
-      clientOrSupplier: item.clientOrSupplier || "",
+      clientOrSupplier: item.clientOrSupplier || "عبدو",
       notes: item.notes || "",
     });
     setIsFormOpen(true);
@@ -391,18 +540,23 @@ export default function App() {
     e.preventDefault();
     if (!formData.deviceName.trim()) return;
 
+    const sellVal = Number(formData.sellPrice) || 0;
+    // لو المستخدم دخل سعر بيع فعلي وساب الحالة "متاح"، نحولها تلقائياً لـ "مباع" أو نلتزم باختياره
+    const finalStatus =
+      !editingItem && sellVal > 0 && formData.status === "متاح" ? "مباع" : formData.status;
+
     const payload = {
       deviceName: formData.deviceName,
       imei: formData.imei,
-      storage: formData.storage,
-      condition: formData.condition,
+      specs: formData.specs,
       buyPrice: isAdmin
         ? Number(formData.buyPrice) || 0
         : editingItem
         ? Number(editingItem.buyPrice) || 0
         : 0,
-      sellPrice: Number(formData.sellPrice) || 0,
-      status: formData.status,
+      expectedSellPrice: Number(formData.expectedSellPrice) || 0,
+      sellPrice: sellVal,
+      status: finalStatus,
       clientOrSupplier: formData.clientOrSupplier,
       notes: formData.notes,
       updatedAt: serverTimestamp(),
@@ -416,6 +570,7 @@ export default function App() {
         const colRef = collection(db, "artifacts", appId, "public", "data", "devices");
         await addDoc(colRef, {
           ...payload,
+          orderIndex: devices.length + 1,
           createdAt: serverTimestamp(),
         });
       }
@@ -515,13 +670,13 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-wide text-white">DELTA TECHNOLOGY</h1>
-              <p className="text-xs text-slate-400">نظام إدارة وحسابات الأجهزة • مول دايموند</p>
+              <p className="text-xs text-slate-400">حسابات الأجهزة • مول دايموند</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <div
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium border ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium border ${
                 isAdmin
                   ? "bg-amber-500/10 border-amber-500/40 text-amber-300"
                   : "bg-slate-800 border-slate-700 text-slate-300"
@@ -531,10 +686,21 @@ export default function App() {
               <span>{isAdmin ? "مدير النظام" : "موظف مبيعات"}</span>
             </div>
 
+            {isAdmin && devices.length === 0 && (
+              <button
+                onClick={handleSyncGoogleSheetData}
+                disabled={importing}
+                className="flex items-center gap-2 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/40 text-amber-300 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition"
+              >
+                <IconDatabase className="w-4 h-4" />
+                <span>{importing ? "جاري الرفع..." : "استيراد داتا الشيت (20 جهاز)"}</span>
+              </button>
+            )}
+
             <button
               onClick={handleCSVExport}
               title="تنزيل نسخة احتياطية بصيغة CSV"
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-3.5 py-2 rounded-xl text-sm font-medium transition"
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition"
             >
               <IconDownload className="w-4 h-4" />
               <span>تصدير CSV</span>
@@ -550,16 +716,15 @@ export default function App() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={importing}
-              title="ترتيب الأعمدة: اسم الجهاز، المساحة، IMEI، سعر الشراء، سعر البيع، الحالة، العميل، ملاحظات"
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-sm font-medium transition"
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition"
             >
               <IconUpload className="w-4 h-4" />
-              <span>{importing ? "جاري الاستيراد..." : "استيراد CSV"}</span>
+              <span>استيراد CSV</span>
             </button>
 
             <button
               onClick={openAddModal}
-              className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
+              className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition"
             >
               <IconPlus className="w-4 h-4" />
               <span>إضافة جهاز</span>
@@ -583,47 +748,122 @@ export default function App() {
           </div>
         )}
 
-        {/* بطاقات الإحصائيات */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* القسم الأول: ملخص الحركة والمبيعات */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-            <div className="text-sm text-slate-400 mb-2">الأجهزة المتاحة بالمخزن</div>
-            <p className="text-2xl font-bold text-white">{stats.availableCount} جهاز</p>
+            <div className="text-xs text-slate-400 mb-1.5">إجمالي المبيعات</div>
+            <p className="text-2xl font-bold text-emerald-400">
+              {stats.totalRevenue.toLocaleString()} ج.م
+            </p>
+            <p className="text-xs text-slate-500 mt-1">قيمة الأجهزة المباعة فعلياً</p>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div className="text-xs text-slate-400 mb-1.5">عدد الأجهزة المباعة</div>
+            <p className="text-2xl font-bold text-white">{stats.soldCount} جهاز</p>
             <p className="text-xs text-slate-500 mt-1">من إجمالي {stats.totalDevices} مسجل</p>
           </div>
 
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-            <div className="text-sm text-slate-400 mb-2">إجمالي المبيعات</div>
-            <p className="text-2xl font-bold text-emerald-400">
-              {stats.totalRevenue.toLocaleString()} ج.م
-            </p>
-            <p className="text-xs text-slate-500 mt-1">للأجهزة المباعة</p>
+            <div className="text-xs text-slate-400 mb-1.5">عدد الأجهزة الحالية بالمخزن</div>
+            <p className="text-2xl font-bold text-cyan-400">{stats.availableCount} جهاز</p>
+            <p className="text-xs text-slate-500 mt-1">متاح للبيع</p>
           </div>
-
-          {isAdmin ? (
-            <>
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-                <div className="text-sm text-slate-400 mb-2">صافي الأرباح</div>
-                <p className="text-2xl font-bold text-amber-400">
-                  {stats.totalProfit.toLocaleString()} ج.م
-                </p>
-                <p className="text-xs text-slate-500 mt-1">خاص بالإدارة فقط</p>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-                <div className="text-sm text-slate-400 mb-2">رأس مال المخزن الحالي</div>
-                <p className="text-2xl font-bold text-purple-400">
-                  {stats.inventoryCost.toLocaleString()} ج.م
-                </p>
-                <p className="text-xs text-slate-500 mt-1">تكلفة الأجهزة المتاحة</p>
-              </div>
-            </>
-          ) : (
-            <div className="sm:col-span-2 bg-slate-900/50 border border-slate-800/80 p-5 rounded-2xl flex items-center justify-center text-slate-500 text-sm gap-2">
-              <IconLock className="w-4 h-4" />
-              <span>بيانات التكلفة وصافي الأرباح محجوبة لحساب المبيعات</span>
-            </div>
-          )}
         </div>
+
+        {/* القسم الثاني (للإدارة فقط): توزيع الأرباح (40% / 60%) + متابعة صندوق رأس المال */}
+        {isAdmin ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* بطاقة توزيع الأرباح */}
+            <div className="bg-slate-900 border border-amber-500/30 p-5 rounded-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h2 className="text-sm font-bold text-amber-300">توزيع صافي أرباح المحل</h2>
+                <span className="text-xs text-slate-400">نسبة 40% / 60%</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-slate-950/70 border border-slate-800 p-3 rounded-xl">
+                  <div className="text-xs text-slate-400 mb-1">إجمالي الصافي</div>
+                  <div className="text-lg font-bold text-white">
+                    {stats.totalProfit.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/70 border border-cyan-500/20 p-3 rounded-xl">
+                  <div className="text-xs text-cyan-400 mb-1">نصيب عبدو (40%)</div>
+                  <div className="text-lg font-bold text-cyan-300">
+                    {stats.abdoShare.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/70 border border-emerald-500/20 p-3 rounded-xl">
+                  <div className="text-xs text-emerald-400 mb-1">نصيب الإدارة (60%)</div>
+                  <div className="text-lg font-bold text-emerald-300">
+                    {stats.adminShare.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* بطاقة متابعة صندوق رأس المال */}
+            <div className="bg-slate-900 border border-purple-500/30 p-5 rounded-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h2 className="text-sm font-bold text-purple-300">متابعة صندوق رأس المال</h2>
+                {!isEditingCapital ? (
+                  <button
+                    onClick={() => setIsEditingCapital(true)}
+                    className="text-xs text-slate-400 hover:text-white underline"
+                  >
+                    تعديل رأس المال الأصلي
+                  </button>
+                ) : (
+                  <form onSubmit={handleSaveCapital} className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      value={capitalInput}
+                      onChange={(e) => setCapitalInput(e.target.value)}
+                      className="w-28 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white"
+                    />
+                    <button type="submit" className="bg-purple-600 text-white text-xs px-2 py-1 rounded-lg">
+                      حفظ
+                    </button>
+                  </form>
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-slate-950/70 border border-slate-800 p-3 rounded-xl">
+                  <div className="text-xs text-slate-400 mb-1">رأس المال الأصلي</div>
+                  <div className="text-lg font-bold text-white">
+                    {originalCapital.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/70 border border-slate-800 p-3 rounded-xl">
+                  <div className="text-xs text-slate-400 mb-1">قيمة البضاعة (شراء)</div>
+                  <div className="text-lg font-bold text-amber-400">
+                    {stats.inventoryCost.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/70 border border-purple-500/20 p-3 rounded-xl">
+                  <div className="text-xs text-purple-300 mb-1">الكاش المتبقي</div>
+                  <div className="text-lg font-bold text-purple-300">
+                    {stats.remainingCapitalCash.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">
+                    بالأرباح: {stats.totalCashInHand.toLocaleString()} ج.م
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-slate-900/50 border border-slate-800/80 p-4 rounded-2xl flex items-center justify-center text-slate-500 text-sm gap-2">
+            <IconLock className="w-4 h-4" />
+            <span>بيانات رأس المال وتوزيع الأرباح محجوبة لحساب المبيعات</span>
+          </div>
+        )}
 
         {/* شريط البحث والفلترة */}
         <div className="flex flex-col sm:flex-row gap-3">
@@ -633,7 +873,7 @@ export default function App() {
             </span>
             <input
               type="text"
-              placeholder="ابحث باسم الجهاز، السيريال IMEI، أو اسم العميل/المورد..."
+              placeholder="ابحث باسم الجهاز، المواصفات، السيريال، أو الملاحظات..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl pr-11 pl-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
@@ -657,7 +897,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* جدول الأجهزة */}
+        {/* جدول الأجهزة (مطابق لأعمدة الشيت بالكامل) */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
           {dataLoading ? (
             <div className="py-12 text-center text-slate-400 text-sm">جاري تحميل الأجهزة...</div>
@@ -666,38 +906,70 @@ export default function App() {
               <table className="w-full text-right text-sm">
                 <thead className="bg-slate-950/60 text-slate-400 border-b border-slate-800">
                   <tr>
-                    <th className="py-3.5 px-4 font-medium">الجهاز والمواصفات</th>
-                    <th className="py-3.5 px-4 font-medium">IMEI / السيريال</th>
-                    <th className="py-3.5 px-4 font-medium">الحالة</th>
+                    <th className="py-3.5 px-3 font-medium w-12 text-center">م</th>
+                    <th className="py-3.5 px-4 font-medium">اسم الجهاز</th>
                     {isAdmin && <th className="py-3.5 px-4 font-medium">سعر الشراء</th>}
+                    <th className="py-3.5 px-4 font-medium">سعر البيع المتوقع</th>
                     <th className="py-3.5 px-4 font-medium">سعر البيع</th>
-                    {isAdmin && <th className="py-3.5 px-4 font-medium">الربح</th>}
-                    <th className="py-3.5 px-4 font-medium">العميل / المورد</th>
+                    <th className="py-3.5 px-4 font-medium">حالة الجهاز (مواصفات)</th>
+                    {isAdmin && <th className="py-3.5 px-4 font-medium">صافي ربح الجهاز</th>}
+                    <th className="py-3.5 px-4 font-medium">الحالة</th>
+                    <th className="py-3.5 px-4 font-medium">ملاحظات</th>
                     <th className="py-3.5 px-4 font-medium text-center">إجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
                   {filteredDevices.length === 0 ? (
                     <tr>
-                      <td colSpan={isAdmin ? 8 : 6} className="py-12 text-center text-slate-500">
-                        لا توجد أجهزة مطابقة حالياً. اضغط على «إضافة جهاز» أو «استيراد CSV» للبدء.
+                      <td colSpan={isAdmin ? 10 : 8} className="py-12 text-center text-slate-500">
+                        لا توجد أجهزة مسجلة بعد. اضغط على «استيراد داتا الشيت (20 جهاز)» بالأعلى لرفع بياناتك فوراً.
                       </td>
                     </tr>
                   ) : (
-                    filteredDevices.map((item) => {
+                    filteredDevices.map((item, idx) => {
                       const profit = (Number(item.sellPrice) || 0) - (Number(item.buyPrice) || 0);
                       return (
                         <tr key={item.id} className="hover:bg-slate-800/40 transition">
+                          <td className="py-3.5 px-3 text-center text-slate-500 font-mono text-xs">
+                            {idx + 1}
+                          </td>
                           <td className="py-3.5 px-4">
                             <div className="font-semibold text-white">{item.deviceName}</div>
-                            <div className="text-xs text-slate-400">
-                              {item.storage ? `${item.storage} • ` : ""}
-                              {item.condition}
-                            </div>
+                            {item.imei && (
+                              <div className="text-[11px] font-mono text-slate-500">IMEI: {item.imei}</div>
+                            )}
                           </td>
-                          <td className="py-3.5 px-4 font-mono text-xs text-slate-300">
-                            {item.imei || "—"}
+                          {isAdmin && (
+                            <td className="py-3.5 px-4 text-slate-300">
+                              {Number(item.buyPrice || 0).toLocaleString()} ج.م
+                            </td>
+                          )}
+                          <td className="py-3.5 px-4 text-slate-400">
+                            {Number(item.expectedSellPrice) > 0
+                              ? `${Number(item.expectedSellPrice).toLocaleString()} ج.م`
+                              : "—"}
                           </td>
+                          <td className="py-3.5 px-4 font-semibold text-white">
+                            {Number(item.sellPrice) > 0
+                              ? `${Number(item.sellPrice).toLocaleString()} ج.م`
+                              : "—"}
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-300 text-xs">
+                            {item.specs || item.storage || "—"}
+                          </td>
+                          {isAdmin && (
+                            <td
+                              className={`py-3.5 px-4 font-semibold ${
+                                item.status === "مباع"
+                                  ? profit >= 0
+                                    ? "text-emerald-400"
+                                    : "text-red-400"
+                                  : "text-slate-500"
+                              }`}
+                            >
+                              {item.status === "مباع" ? `${profit.toLocaleString()} ج.م` : "—"}
+                            </td>
+                          )}
                           <td className="py-3.5 px-4">
                             <span
                               className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -711,31 +983,14 @@ export default function App() {
                               {item.status}
                             </span>
                           </td>
-                          {isAdmin && (
-                            <td className="py-3.5 px-4 text-slate-300">
-                              {Number(item.buyPrice || 0).toLocaleString()} ج.م
-                            </td>
-                          )}
-                          <td className="py-3.5 px-4 font-semibold text-white">
-                            {Number(item.sellPrice || 0).toLocaleString()} ج.م
-                          </td>
-                          {isAdmin && (
-                            <td
-                              className={`py-3.5 px-4 font-semibold ${
-                                profit >= 0 ? "text-emerald-400" : "text-red-400"
-                              }`}
-                            >
-                              {profit.toLocaleString()} ج.م
-                            </td>
-                          )}
-                          <td className="py-3.5 px-4 text-slate-300">
-                            {item.clientOrSupplier || "—"}
+                          <td className="py-3.5 px-4 text-slate-400 text-xs">
+                            {item.notes || "—"}
                           </td>
                           <td className="py-3.5 px-4">
                             <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() => openEditModal(item)}
-                                title="تعديل"
+                                title="تعديل / تسجيل بيع"
                                 className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                               >
                                 <IconEdit className="w-4 h-4" />
@@ -768,7 +1023,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h2 className="text-lg font-bold text-white">
-                {editingItem ? "تعديل بيانات الجهاز" : "تسجيل جهاز جديد"}
+                {editingItem ? "تعديل بيانات الجهاز / تسجيل بيع" : "تسجيل جهاز جديد"}
               </h2>
               <button
                 onClick={() => setIsFormOpen(false)}
@@ -781,54 +1036,29 @@ export default function App() {
             <form onSubmit={handleSaveDevice} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">اسم الموديل *</label>
+                  <label className="block text-xs text-slate-400 mb-1">اسم الجهاز *</label>
                   <input
                     type="text"
                     required
-                    placeholder="مثال: iPhone 13 Pro Max"
+                    placeholder="مثال: 13 pro max"
                     value={formData.deviceName}
                     onChange={(e) => setFormData({ ...formData, deviceName: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">المساحة / اللون</label>
+                  <label className="block text-xs text-slate-400 mb-1">حالة الجهاز (مواصفات)</label>
                   <input
                     type="text"
-                    placeholder="مثال: 256GB أزرق"
-                    value={formData.storage}
-                    onChange={(e) => setFormData({ ...formData, storage: e.target.value })}
+                    placeholder="مثال: 256GB بطارية 89% كسر زيرو"
+                    value={formData.specs}
+                    onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1">IMEI / السيريال</label>
-                  <input
-                    type="text"
-                    placeholder="آخر 5 أرقام أو السيريال كامل"
-                    value={formData.imei}
-                    onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1">حالة الجهاز</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
-                  >
-                    <option value="متاح">متاح</option>
-                    <option value="مباع">مباع</option>
-                    <option value="صيانة">صيانة</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {isAdmin && (
                   <div>
                     <label className="block text-xs text-slate-400 mb-1">سعر الشراء (ج.م)</label>
@@ -840,8 +1070,17 @@ export default function App() {
                     />
                   </div>
                 )}
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">سعر البيع المتوقع</label>
+                  <input
+                    type="number"
+                    value={formData.expectedSellPrice}
+                    onChange={(e) => setFormData({ ...formData, expectedSellPrice: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
+                  />
+                </div>
                 <div className={isAdmin ? "" : "sm:col-span-2"}>
-                  <label className="block text-xs text-slate-400 mb-1">سعر البيع (ج.م)</label>
+                  <label className="block text-xs text-slate-400 mb-1">سعر البيع الفعلي</label>
                   <input
                     type="number"
                     value={formData.sellPrice}
@@ -851,22 +1090,36 @@ export default function App() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">اسم العميل أو المورد</label>
-                <input
-                  type="text"
-                  placeholder="اسم البائع أو المشتري"
-                  value={formData.clientOrSupplier}
-                  onChange={(e) => setFormData({ ...formData, clientOrSupplier: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">حالة البيع</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
+                  >
+                    <option value="متاح">متاح</option>
+                    <option value="مباع">مباع</option>
+                    <option value="صيانة">صيانة</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">IMEI / السيريال (اختياري)</label>
+                  <input
+                    type="text"
+                    placeholder="آخر 5 أرقام أو السيريال"
+                    value={formData.imei}
+                    onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1">ملاحظات (بطارية / كرتونة / ضمان)</label>
+                <label className="block text-xs text-slate-400 mb-1">ملاحظات</label>
                 <input
                   type="text"
-                  placeholder="مثال: بطارية 89% بالعلبة"
+                  placeholder="أي تفاصيل إضافية..."
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
