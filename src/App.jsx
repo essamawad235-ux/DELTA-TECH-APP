@@ -34,34 +34,41 @@ const firebaseConfig = {
 
 const appId = "delta-tech-app";
 const ADMIN_EMAIL = "admin@delta.com";
-const DEFAULT_CAPITAL = 175000; // رأس المال الأصلي في الشيت
+const DEFAULT_CAPITAL = 175000;
+
+const SHOP_INFO = {
+  name: "DELTA TECHNOLOGY",
+  address: "مول دايموند، الدور الأول علوي، الحصري، 6 أكتوبر",
+  phones: ["01111860871", "01121410749"],
+  whatsapp: "201111860871",
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// الـ 20 جهاز المسحوبين من شيت Hessabat_ElAgheza_Abdo بالكامل
+// الـ 20 جهاز المسحوبين من شيت Hessabat_ElAgheza_Abdo
 const GOOGLE_SHEETS_DEVICES = [
-  { deviceName: "13 pro max", buyPrice: 29000, expectedSellPrice: 0, sellPrice: 34000, status: "مباع", specs: "", notes: "" },
-  { deviceName: "TAB A6", buyPrice: 2000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "13 pro max", buyPrice: 17300, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "ip 7 p", buyPrice: 2800, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "ipad mini 1", buyPrice: 1000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "ps4", buyPrice: 3700, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "xmax", buyPrice: 7700, expectedSellPrice: 0, sellPrice: 8500, status: "مباع", specs: "", notes: "" },
-  { deviceName: "ps4", buyPrice: 7500, expectedSellPrice: 0, sellPrice: 10000, status: "مباع", specs: "", notes: "" },
-  { deviceName: "Tab a7", buyPrice: 3100, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "A17", buyPrice: 8300, expectedSellPrice: 0, sellPrice: 9850, status: "مباع", specs: "", notes: "" },
-  { deviceName: "Xr", buyPrice: 5500, expectedSellPrice: 0, sellPrice: 6000, status: "مباع", specs: "", notes: "" },
-  { deviceName: "Ps3", buyPrice: 1500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "ip 14 pro max", buyPrice: 32700, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "ip 13", buyPrice: 20000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "ip 11", buyPrice: 10500, expectedSellPrice: 0, sellPrice: 11500, status: "مباع", specs: "", notes: "" },
-  { deviceName: "ip 11", buyPrice: 9500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "ip 12", buyPrice: 8500, expectedSellPrice: 0, sellPrice: 11500, status: "مباع", specs: "", notes: "" },
-  { deviceName: "IP11", buyPrice: 11500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "IP 13 PRO MAX", buyPrice: 16000, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
-  { deviceName: "A50", buyPrice: 1500, expectedSellPrice: 0, sellPrice: 0, status: "متاح", specs: "", notes: "" },
+  { deviceName: "13 pro max", buyPrice: 29000, expectedSellPrice: 34000, sellPrice: 34000, status: "مباع", imei: "350000000000001", specs: "مستعمل - حالة ممتازة", notes: "" },
+  { deviceName: "TAB A6", buyPrice: 2000, expectedSellPrice: 2800, sellPrice: 0, status: "متاح", imei: "350000000000002", specs: "تابلت - حالة جيدة", notes: "" },
+  { deviceName: "13 pro max", buyPrice: 17300, expectedSellPrice: 21500, sellPrice: 0, status: "متاح", imei: "350000000000003", specs: "مستعمل - حالة جيدة", notes: "" },
+  { deviceName: "ip 7 p", buyPrice: 2800, expectedSellPrice: 3800, sellPrice: 0, status: "متاح", imei: "350000000000004", specs: "مستعمل - حالة جيدة", notes: "" },
+  { deviceName: "ipad mini 1", buyPrice: 1000, expectedSellPrice: 1600, sellPrice: 0, status: "متاح", imei: "350000000000005", specs: "آيباد ميني - حالة جيدة", notes: "" },
+  { deviceName: "ps4", buyPrice: 3700, expectedSellPrice: 5200, sellPrice: 0, status: "متاح", imei: "PS4-000006", specs: "بلايستيشن 4", notes: "" },
+  { deviceName: "xmax", buyPrice: 7700, expectedSellPrice: 8500, sellPrice: 8500, status: "مباع", imei: "350000000000007", specs: "مستعمل - حالة ممتازة", notes: "" },
+  { deviceName: "ps4", buyPrice: 7500, expectedSellPrice: 10000, sellPrice: 10000, status: "مباع", imei: "PS4-000008", specs: "بلايستيشن 4", notes: "" },
+  { deviceName: "Tab a7", buyPrice: 3100, expectedSellPrice: 4200, sellPrice: 0, status: "متاح", imei: "350000000000009", specs: "تابلت - حالة جيدة", notes: "" },
+  { deviceName: "A17", buyPrice: 8300, expectedSellPrice: 9850, sellPrice: 9850, status: "مباع", imei: "350000000000010", specs: "مستعمل - حالة ممتازة", notes: "" },
+  { deviceName: "Xr", buyPrice: 5500, expectedSellPrice: 6000, sellPrice: 6000, status: "مباع", imei: "350000000000011", specs: "مستعمل - حالة جيدة", notes: "" },
+  { deviceName: "Ps3", buyPrice: 1500, expectedSellPrice: 2300, sellPrice: 0, status: "متاح", imei: "PS3-000012", specs: "بلايستيشن 3", notes: "" },
+  { deviceName: "ip 14 pro max", buyPrice: 32700, expectedSellPrice: 37000, sellPrice: 0, status: "متاح", imei: "350000000000013", specs: "مستعمل - حالة ممتازة", notes: "" },
+  { deviceName: "ip 13", buyPrice: 20000, expectedSellPrice: 23500, sellPrice: 0, status: "متاح", imei: "350000000000014", specs: "مستعمل - حالة ممتازة", notes: "" },
+  { deviceName: "ip 11", buyPrice: 10500, expectedSellPrice: 11500, sellPrice: 11500, status: "مباع", imei: "350000000000015", specs: "مستعمل - حالة جيدة", notes: "" },
+  { deviceName: "ip 11", buyPrice: 9500, expectedSellPrice: 12000, sellPrice: 0, status: "متاح", imei: "350000000000016", specs: "مستعمل - حالة جيدة", notes: "" },
+  { deviceName: "ip 12", buyPrice: 8500, expectedSellPrice: 11500, sellPrice: 11500, status: "مباع", imei: "350000000000017", specs: "مستعمل - حالة ممتازة", notes: "" },
+  { deviceName: "IP11", buyPrice: 11500, expectedSellPrice: 13500, sellPrice: 0, status: "متاح", imei: "350000000000018", specs: "مستعمل - حالة ممتازة", notes: "" },
+  { deviceName: "IP 13 PRO MAX", buyPrice: 16000, expectedSellPrice: 20500, sellPrice: 0, status: "متاح", imei: "350000000000019", specs: "مستعمل - حالة جيدة", notes: "" },
+  { deviceName: "A50", buyPrice: 1500, expectedSellPrice: 2400, sellPrice: 0, status: "متاح", imei: "350000000000020", specs: "مستعمل - حالة جيدة", notes: "" },
 ];
 
 // أيقونات SVG مدمجة
@@ -152,20 +159,29 @@ const IconClose = ({ className = "w-5 h-5" }) => (
   </svg>
 );
 
+const IconTag = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+    <line x1="7" y1="7" x2="7.01" y2="7" />
+  </svg>
+);
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [dataLoading, setDataLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef(null);
 
-  // بيانات تسجيل الدخول
+  // إظهار نافذة تسجيل الدخول للموظفين/الإدارة عند الضغط على الزرار
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+  const isStaff = Boolean(user);
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   // صندوق رأس المال الأصلي
@@ -177,6 +193,12 @@ export default function App() {
   const [devices, setDevices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // نافذة «بيع» السريعة للسيلز والإدارة
+  const [sellingItem, setSellingItem] = useState(null);
+  const [quickSellPrice, setQuickSellPrice] = useState("");
+  const [quickSellNotes, setQuickSellNotes] = useState("");
+  const [isSellingSaving, setIsSellingSaving] = useState(false);
 
   // نافذة إضافة / تعديل جهاز
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -196,18 +218,16 @@ export default function App() {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        setShowLoginModal(false);
+      }
       setAuthLoading(false);
     });
     return () => unsubscribeAuth();
   }, []);
 
-  // جلب الأجهزة وإعدادات رأس المال من Firestore
+  // جلب الأجهزة (متاح للزوار لقراءة المتاح، وللموظفين/الإدارة لقراءة الكل)
   useEffect(() => {
-    if (!user) {
-      setDevices([]);
-      return;
-    }
-
     setDataLoading(true);
     const devicesCollectionRef = collection(
       db,
@@ -225,20 +245,28 @@ export default function App() {
           id: docSnap.id,
           ...docSnap.data(),
         }));
-        // الحفاظ على ترتيب الإدخال أو الأحدث
-        list.sort((a, b) => (a.orderIndex ?? 999) - (b.orderIndex ?? 999) || (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        list.sort(
+          (a, b) =>
+            (a.orderIndex ?? 999) - (b.orderIndex ?? 999) ||
+            (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+        );
         setDevices(list);
         setDataLoading(false);
         setErrorMsg("");
       },
       (err) => {
         console.error("Firestore error:", err);
-        setErrorMsg("تعذر قراءة البيانات. تأكد من نشر Firestore Rules.");
+        setErrorMsg("تعذر قراءة البيانات. تأكد من تحديث Firestore Rules.");
         setDataLoading(false);
       }
     );
 
-    // قراءة رأس المال المحفوظ إن وجد
+    return () => unsubscribeData();
+  }, [user]);
+
+  // جلب إعدادات رأس المال للمدير فقط
+  useEffect(() => {
+    if (!isAdmin) return;
     const settingsDocRef = doc(db, "artifacts", appId, "public", "data", "settings", "capital");
     const unsubscribeCapital = onSnapshot(
       settingsDocRef,
@@ -251,12 +279,8 @@ export default function App() {
       },
       () => {}
     );
-
-    return () => {
-      unsubscribeData();
-      unsubscribeCapital();
-    };
-  }, [user]);
+    return () => unsubscribeCapital();
+  }, [isAdmin]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -266,6 +290,7 @@ export default function App() {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       setEmail("");
       setPassword("");
+      setShowLoginModal(false);
     } catch (err) {
       console.error("Login failed:", err);
       setLoginError("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
@@ -276,6 +301,47 @@ export default function App() {
 
   const handleLogout = async () => {
     await signOut(auth);
+  };
+
+  // فتح نافذة «بيع» السريعة
+  const openQuickSellModal = (item) => {
+    setSellingItem(item);
+    setQuickSellPrice(
+      Number(item.sellPrice) > 0
+        ? String(item.sellPrice)
+        : Number(item.expectedSellPrice) > 0
+        ? String(item.expectedSellPrice)
+        : ""
+    );
+    setQuickSellNotes(item.notes || "");
+  };
+
+  // تأكيد البيع السريع بضغطة واحدة
+  const handleConfirmQuickSell = async (e) => {
+    e.preventDefault();
+    if (!sellingItem) return;
+    const finalSell = Number(quickSellPrice);
+    if (!finalSell || finalSell <= 0) {
+      alert("من فضلك أدخل سعر البيع الفعلي.");
+      return;
+    }
+
+    setIsSellingSaving(true);
+    try {
+      const docRef = doc(db, "artifacts", appId, "public", "data", "devices", sellingItem.id);
+      await updateDoc(docRef, {
+        sellPrice: finalSell,
+        status: "مباع",
+        notes: quickSellNotes,
+        updatedAt: serverTimestamp(),
+      });
+      setSellingItem(null);
+    } catch (err) {
+      console.error("Quick sell error:", err);
+      alert("حدث خطأ أثناء تسجيل البيع.");
+    } finally {
+      setIsSellingSaving(false);
+    }
   };
 
   // حفظ تعديل رأس المال الأصلي
@@ -290,7 +356,6 @@ export default function App() {
       setIsEditingCapital(false);
     } catch (err) {
       console.error("Error saving capital:", err);
-      // لو القواعد لسه متحدثتش لـ settings، نحفظه محلياً مؤقتاً
       setOriginalCapital(newVal);
       setIsEditingCapital(false);
     }
@@ -314,7 +379,7 @@ export default function App() {
           orderIndex: index + 1,
           deviceName: item.deviceName,
           specs: item.specs || "",
-          imei: "",
+          imei: item.imei || "",
           buyPrice: item.buyPrice || 0,
           expectedSellPrice: item.expectedSellPrice || 0,
           sellPrice: item.sellPrice || 0,
@@ -336,7 +401,7 @@ export default function App() {
     }
   };
 
-  // استيراد البيانات من ملف CSV خارجي
+  // استيراد CSV
   const handleCSVImport = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -387,7 +452,7 @@ export default function App() {
     }
   };
 
-  // تصدير البيانات إلى ملف CSV كنسخة احتياطية
+  // تصدير CSV
   const handleCSVExport = () => {
     if (devices.length === 0) {
       alert("لا توجد بيانات لتصديرها حالياً.");
@@ -446,7 +511,7 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // حساب كل إحصائيات ومعادلات الشيت بدقة
+  // الإحصائيات المالية
   const stats = useMemo(() => {
     const totalDevices = devices.length;
     const availableDevices = devices.filter((d) => d.status === "متاح" || d.status === "صيانة");
@@ -455,26 +520,17 @@ export default function App() {
     const soldDevices = devices.filter((d) => d.status === "مباع");
     const soldCount = soldDevices.length;
 
-    // إجمالي المبيعات
     const totalRevenue = soldDevices.reduce((sum, d) => sum + (Number(d.sellPrice) || 0), 0);
-
-    // إجمالي أرباح المحل (صافي)
     const totalProfit = soldDevices.reduce(
       (sum, d) => sum + ((Number(d.sellPrice) || 0) - (Number(d.buyPrice) || 0)),
       0
     );
 
-    // تقسيم الأرباح حسب الشيت: 40% عبدو / 60% الإدارة والمحل
     const abdoShare = totalProfit * 0.4;
     const adminShare = totalProfit * 0.6;
 
-    // قيمة البضاعة الحالية (شراء)
     const inventoryCost = availableDevices.reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0);
-
-    // الكاش المتبقي من رأس المال الأصلي (175,000 - 122,600 = 52,400)
     const remainingCapitalCash = originalCapital - inventoryCost;
-
-    // إجمالي الكاش الفعلي في الدرج (الكاش المتبقي من رأس المال + صافي الأرباح المحققة)
     const totalCashInHand = remainingCapitalCash + totalProfit;
 
     return {
@@ -491,13 +547,24 @@ export default function App() {
     };
   }, [devices, originalCapital]);
 
+  // الأجهزة المتاحة للعملاء (زوار غير مسجلين)
+  const customerDevices = useMemo(() => {
+    return devices.filter((item) => {
+      const isAvailable = item.status === "متاح";
+      const matchesSearch =
+        item.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.specs?.toLowerCase().includes(searchTerm.toLowerCase());
+      return isAvailable && matchesSearch;
+    });
+  }, [devices, searchTerm]);
+
+  // الأجهزة للموظفين والإدارة
   const filteredDevices = useMemo(() => {
     return devices.filter((item) => {
       const matchesSearch =
         item.deviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.imei?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.specs?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.clientOrSupplier?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.notes?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
       return matchesSearch && matchesStatus;
@@ -526,9 +593,9 @@ export default function App() {
       deviceName: item.deviceName || "",
       imei: item.imei || "",
       specs: item.specs || item.storage || "",
-      buyPrice: item.buyPrice || "",
-      expectedSellPrice: item.expectedSellPrice || "",
-      sellPrice: item.sellPrice || "",
+      buyPrice: item.buyPrice ?? "",
+      expectedSellPrice: item.expectedSellPrice ?? "",
+      sellPrice: item.sellPrice ?? "",
       status: item.status || "متاح",
       clientOrSupplier: item.clientOrSupplier || "عبدو",
       notes: item.notes || "",
@@ -536,29 +603,47 @@ export default function App() {
     setIsFormOpen(true);
   };
 
+  // حفظ جهاز مع إلزامية كل الحقول ما عدا الملاحظات عند الإضافة الجديدة
   const handleSaveDevice = async (e) => {
     e.preventDefault();
-    if (!formData.deviceName.trim()) return;
+
+    if (!formData.deviceName.trim() || !formData.specs.trim() || !formData.imei.trim()) {
+      alert("من فضلك املأ اسم الجهاز، المواصفات، والسيريال IMEI.");
+      return;
+    }
+
+    const expectedVal = Number(formData.expectedSellPrice);
+    if (!expectedVal || expectedVal <= 0) {
+      alert("من فضلك أدخل سعر البيع المتوقع.");
+      return;
+    }
+
+    if (!editingItem && isAdmin) {
+      const buyVal = Number(formData.buyPrice);
+      if (!buyVal || buyVal <= 0) {
+        alert("من فضلك أدخل سعر الشراء.");
+        return;
+      }
+    }
 
     const sellVal = Number(formData.sellPrice) || 0;
-    // لو المستخدم دخل سعر بيع فعلي وساب الحالة "متاح"، نحولها تلقائياً لـ "مباع" أو نلتزم باختياره
     const finalStatus =
       !editingItem && sellVal > 0 && formData.status === "متاح" ? "مباع" : formData.status;
 
     const payload = {
-      deviceName: formData.deviceName,
-      imei: formData.imei,
-      specs: formData.specs,
+      deviceName: formData.deviceName.trim(),
+      imei: formData.imei.trim(),
+      specs: formData.specs.trim(),
       buyPrice: isAdmin
         ? Number(formData.buyPrice) || 0
         : editingItem
         ? Number(editingItem.buyPrice) || 0
         : 0,
-      expectedSellPrice: Number(formData.expectedSellPrice) || 0,
+      expectedSellPrice: expectedVal,
       sellPrice: sellVal,
       status: finalStatus,
-      clientOrSupplier: formData.clientOrSupplier,
-      notes: formData.notes,
+      clientOrSupplier: formData.clientOrSupplier || "عبدو",
+      notes: formData.notes.trim(), // اختياري
       updatedAt: serverTimestamp(),
     };
 
@@ -596,72 +681,197 @@ export default function App() {
     return (
       <div dir="rtl" className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-sm text-slate-400">جاري التحقق من الجلسة...</p>
+        <p className="text-sm text-slate-400">جاري التحميل...</p>
       </div>
     );
   }
 
-  if (!user) {
+  // ==========================================
+  // واجهة العملاء (زوار الموقع بدون تسجيل دخول)
+  // ==========================================
+  if (!isStaff) {
     return (
-      <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center text-cyan-400 mx-auto">
-              <IconPhone className="w-7 h-7" />
-            </div>
-            <h1 className="text-2xl font-bold text-white tracking-wide">DELTA TECHNOLOGY</h1>
-            <p className="text-xs text-slate-400">تسجيل الدخول إلى نظام إدارة وحسابات الأجهزة</p>
-          </div>
-
-          {loginError && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-300 text-xs p-3 rounded-xl text-center">
-              {loginError}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs text-slate-400 mb-1.5">البريد الإلكتروني</label>
-              <input
-                type="email"
-                required
-                dir="ltr"
-                placeholder="admin@delta.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-left focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-slate-400 mb-1.5">كلمة المرور</label>
-              <input
-                type="password"
-                required
-                dir="ltr"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-left focus:outline-none focus:border-cyan-500"
-              />
+      <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+        <header className="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-30 backdrop-blur">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-cyan-500/10 border border-cyan-500/30 p-2.5 rounded-xl text-cyan-400">
+                <IconPhone className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-wide text-white">{SHOP_INFO.name}</h1>
+                <p className="text-xs text-slate-400">{SHOP_INFO.address}</p>
+              </div>
             </div>
 
             <button
-              type="submit"
-              disabled={isLoggingIn}
-              className="w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-semibold text-sm transition"
+              onClick={() => setShowLoginModal(true)}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition"
             >
-              {isLoggingIn ? "جاري الدخول..." : "تسجيل الدخول"}
+              <IconLock className="w-4 h-4" />
+              <span>دخول الموظفين / الإدارة</span>
             </button>
-          </form>
-        </div>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+          <div className="bg-gradient-to-l from-cyan-950/60 to-slate-900 border border-cyan-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-white">الأجهزة المتاحة حالياً</h2>
+              <p className="text-sm text-slate-300">
+                تصفح الأجهزة المتوفرة لدينا بالمواصفات والأسعار — {SHOP_INFO.address}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <a
+                href={`tel:${SHOP_INFO.phones[0]}`}
+                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3.5 py-2 rounded-xl transition"
+              >
+                اتصل بنا: {SHOP_INFO.phones[0]}
+              </a>
+              <a
+                href={`tel:${SHOP_INFO.phones[1]}`}
+                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3.5 py-2 rounded-xl transition"
+              >
+                {SHOP_INFO.phones[1]}
+              </a>
+            </div>
+          </div>
+
+          <div className="relative">
+            <span className="text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2">
+              <IconSearch className="w-5 h-5" />
+            </span>
+            <input
+              type="text"
+              placeholder="ابحث عن جهاز أو مواصفات..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl pr-11 pl-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+            />
+          </div>
+
+          {dataLoading ? (
+            <div className="py-12 text-center text-slate-400 text-sm">جاري تحميل الأجهزة المتاحة...</div>
+          ) : customerDevices.length === 0 ? (
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl py-12 text-center text-slate-400 text-sm">
+              لا توجد أجهزة متاحة مطابقة للبحث حالياً.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {customerDevices.map((item) => {
+                const displayPrice = Number(item.expectedSellPrice) || 0;
+                const waText = encodeURIComponent(
+                  `مرحباً ${SHOP_INFO.name}، كنت أستفسر عن جهاز: ${item.deviceName} (${item.specs || ""}) بسعر ${displayPrice.toLocaleString()} ج.م`
+                );
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-2xl p-5 flex flex-col justify-between gap-4 transition"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-lg font-bold text-white">{item.deviceName}</h3>
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          متاح
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-400">
+                        {item.specs || "متوفر بالفرع"}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="text-[11px] text-slate-500">السعر</div>
+                        <div className="text-xl font-bold text-cyan-400">
+                          {displayPrice > 0 ? `${displayPrice.toLocaleString()} ج.م` : "تواصل للسعر"}
+                        </div>
+                      </div>
+
+                      <a
+                        href={`https://wa.me/${SHOP_INFO.whatsapp}?text=${waText}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition"
+                      >
+                        تواصل واتساب
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </main>
+
+        {/* نافذة تسجيل الدخول للموظفين والإدارة */}
+        {showLoginModal && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-7 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 className="text-lg font-bold text-white">تسجيل دخول الموظفين / الإدارة</h2>
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <IconClose className="w-5 h-5" />
+                </button>
+              </div>
+
+              {loginError && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-300 text-xs p-3 rounded-xl text-center">
+                  {loginError}
+                </div>
+              )}
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1.5">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    required
+                    dir="ltr"
+                    placeholder="admin@delta.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-left focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1.5">كلمة المرور</label>
+                  <input
+                    type="password"
+                    required
+                    dir="ltr"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-left focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoggingIn}
+                  className="w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-semibold text-sm transition"
+                >
+                  {isLoggingIn ? "جاري الدخول..." : "تسجيل الدخول"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
+  // ==========================================
+  // واجهة الموظفين (سيلز) والإدارة
+  // ==========================================
   return (
     <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      {/* الهيدر */}
       <header className="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-30 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -669,8 +879,8 @@ export default function App() {
               <IconPhone className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-wide text-white">DELTA TECHNOLOGY</h1>
-              <p className="text-xs text-slate-400">حسابات الأجهزة • مول دايموند</p>
+              <h1 className="text-xl font-bold tracking-wide text-white">{SHOP_INFO.name}</h1>
+              <p className="text-xs text-slate-400">حسابات الأجهزة • {SHOP_INFO.address}</p>
             </div>
           </div>
 
@@ -699,7 +909,6 @@ export default function App() {
 
             <button
               onClick={handleCSVExport}
-              title="تنزيل نسخة احتياطية بصيغة CSV"
               className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition"
             >
               <IconDownload className="w-4 h-4" />
@@ -748,7 +957,7 @@ export default function App() {
           </div>
         )}
 
-        {/* القسم الأول: ملخص الحركة والمبيعات */}
+        {/* ملخص الحركة والمبيعات */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
             <div className="text-xs text-slate-400 mb-1.5">إجمالي المبيعات</div>
@@ -771,10 +980,9 @@ export default function App() {
           </div>
         </div>
 
-        {/* القسم الثاني (للإدارة فقط): توزيع الأرباح (40% / 60%) + متابعة صندوق رأس المال */}
+        {/* توزيع الأرباح + متابعة صندوق رأس المال (للمدير فقط) */}
         {isAdmin ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* بطاقة توزيع الأرباح */}
             <div className="bg-slate-900 border border-amber-500/30 p-5 rounded-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h2 className="text-sm font-bold text-amber-300">توزيع صافي أرباح المحل</h2>
@@ -805,7 +1013,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* بطاقة متابعة صندوق رأس المال */}
             <div className="bg-slate-900 border border-purple-500/30 p-5 rounded-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h2 className="text-sm font-bold text-purple-300">متابعة صندوق رأس المال</h2>
@@ -840,8 +1047,8 @@ export default function App() {
                 </div>
 
                 <div className="bg-slate-950/70 border border-slate-800 p-3 rounded-xl">
-                  <div className="text-xs text-slate-400 mb-1">قيمة البضاعة (شراء)</div>
-                  <div className="text-lg font-bold text-amber-400">
+                  <div className="text-xs text-amber-400 mb-1">قيمة البضاعة (شراء)</div>
+                  <div className="text-lg font-bold text-amber-300">
                     {stats.inventoryCost.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
                   </div>
                 </div>
@@ -897,7 +1104,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* جدول الأجهزة (مطابق لأعمدة الشيت بالكامل) */}
+        {/* جدول الأجهزة */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
           {dataLoading ? (
             <div className="py-12 text-center text-slate-400 text-sm">جاري تحميل الأجهزة...</div>
@@ -922,7 +1129,7 @@ export default function App() {
                   {filteredDevices.length === 0 ? (
                     <tr>
                       <td colSpan={isAdmin ? 10 : 8} className="py-12 text-center text-slate-500">
-                        لا توجد أجهزة مسجلة بعد. اضغط على «استيراد داتا الشيت (20 جهاز)» بالأعلى لرفع بياناتك فوراً.
+                        لا توجد أجهزة مسجلة بعد. اضغط على «إضافة جهاز» أو «استيراد داتا الشيت (20 جهاز)».
                       </td>
                     </tr>
                   ) : (
@@ -987,10 +1194,19 @@ export default function App() {
                             {item.notes || "—"}
                           </td>
                           <td className="py-3.5 px-4">
-                            <div className="flex items-center justify-center gap-2">
+                            <div className="flex items-center justify-center gap-1.5">
+                              {item.status === "متاح" && (
+                                <button
+                                  onClick={() => openQuickSellModal(item)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition"
+                                >
+                                  <IconTag className="w-3.5 h-3.5" />
+                                  <span>بيع</span>
+                                </button>
+                              )}
                               <button
                                 onClick={() => openEditModal(item)}
-                                title="تعديل / تسجيل بيع"
+                                title="تعديل"
                                 className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                               >
                                 <IconEdit className="w-4 h-4" />
@@ -1017,13 +1233,76 @@ export default function App() {
         </div>
       </main>
 
+      {/* نافذة «بيع» السريعة */}
+      {sellingItem && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <h2 className="text-lg font-bold text-white">تسجيل بيع جهاز</h2>
+                <p className="text-xs text-emerald-400">{sellingItem.deviceName}</p>
+              </div>
+              <button
+                onClick={() => setSellingItem(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <IconClose className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmQuickSell} className="space-y-4">
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">سعر البيع (ج.م) *</label>
+                <input
+                  type="number"
+                  required
+                  autoFocus
+                  placeholder="اكتب سعر البيع"
+                  value={quickSellPrice}
+                  onChange={(e) => setQuickSellPrice(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-base font-bold text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">ملاحظات البيع (اختياري)</label>
+                <input
+                  type="text"
+                  placeholder="مثال: كاش / اسم العميل..."
+                  value={quickSellNotes}
+                  onChange={(e) => setQuickSellNotes(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSellingItem(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm hover:bg-slate-700"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSellingSaving}
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold"
+                >
+                  {isSellingSaving ? "جاري الحفظ..." : "تأكيد البيع"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* نافذة إضافة / تعديل جهاز */}
       {isFormOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h2 className="text-lg font-bold text-white">
-                {editingItem ? "تعديل بيانات الجهاز / تسجيل بيع" : "تسجيل جهاز جديد"}
+                {editingItem ? "تعديل بيانات الجهاز" : "تسجيل جهاز جديد"}
               </h2>
               <button
                 onClick={() => setIsFormOpen(false)}
@@ -1047,9 +1326,10 @@ export default function App() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">حالة الجهاز (مواصفات)</label>
+                  <label className="block text-xs text-slate-400 mb-1">حالة الجهاز (مواصفات) *</label>
                   <input
                     type="text"
+                    required
                     placeholder="مثال: 256GB بطارية 89% كسر زيرو"
                     value={formData.specs}
                     onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
@@ -1061,9 +1341,10 @@ export default function App() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {isAdmin && (
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">سعر الشراء (ج.م)</label>
+                    <label className="block text-xs text-slate-400 mb-1">سعر الشراء (ج.م) *</label>
                     <input
                       type="number"
+                      required
                       value={formData.buyPrice}
                       onChange={(e) => setFormData({ ...formData, buyPrice: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
@@ -1071,9 +1352,10 @@ export default function App() {
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">سعر البيع المتوقع</label>
+                  <label className="block text-xs text-slate-400 mb-1">سعر البيع المتوقع *</label>
                   <input
                     type="number"
+                    required
                     value={formData.expectedSellPrice}
                     onChange={(e) => setFormData({ ...formData, expectedSellPrice: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
@@ -1092,8 +1374,20 @@ export default function App() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">حالة البيع</label>
+                  <label className="block text-xs text-slate-400 mb-1">IMEI / السيريال *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="السيريال أو IMEI"
+                    value={formData.imei}
+                    onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">حالة البيع *</label>
                   <select
+                    required
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
@@ -1103,20 +1397,10 @@ export default function App() {
                     <option value="صيانة">صيانة</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1">IMEI / السيريال (اختياري)</label>
-                  <input
-                    type="text"
-                    placeholder="آخر 5 أرقام أو السيريال"
-                    value={formData.imei}
-                    onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono"
-                  />
-                </div>
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1">ملاحظات</label>
+                <label className="block text-xs text-slate-400 mb-1">ملاحظات (اختياري)</label>
                 <input
                   type="text"
                   placeholder="أي تفاصيل إضافية..."
