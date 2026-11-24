@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       tax: u.tax,
       esim: u.esim,
       color: u.color,
-      tags: u.tags.filter((t) => !/^(جديد|معفي|عليه ضريبة)$/.test(t)),
+      tags: [...new Set(u.tags.filter((t) => !/^(جديد|معفي|عليه ضريبة|غير متوفر)$/.test(t)))],
       available: u.inStock,
       price: u.price + MARKUP,
     }));
