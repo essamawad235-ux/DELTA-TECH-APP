@@ -58,7 +58,7 @@ function ValuationForm() {
   return (
     <section id="valuation" style={{ scrollMarginTop: 150 }} className={card}>
       <h2 className="text-xl font-bold text-white mb-1">اعرف سعر جهازك قبل ما تيجي</h2>
-      <p className="text-sm text-slate-400 mb-1">تقييم مبدئي لآيفون 13 (128 جيجا) بحالة سليمة وبالعلبة. باقي الأجهزة والحالات بتتقيّم بعد الفحص. السعر النهائي بعد الفحص في الفرع.</p>
+      <p className="text-sm text-slate-400 mb-1">تقييم مبدئي لآيفون 13 و14 و15 (128 جيجا) بشكل تقريبي بحالة سليمة وبالعلبة. باقي الأجهزة والحالات بتتقيّم بعد الفحص. السعر النهائي بعد الفحص في الفرع.</p>
       {DEMO_UI && <div className={note + ' mb-2 font-bold'}>نسخة تجريبية: أي رقم هنا مش عرض حقيقي ومش معتمد.</div>}
       <form onSubmit={send}>
         <label className={lbl}>الموديل</label>
