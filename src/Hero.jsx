@@ -11,7 +11,7 @@ const SERVICES = [
   { t: 'صيانة موبايلات', d: 'فحص وإصلاح الأعطال.', q: 'عايز أسأل عن صيانة' },
 ];
 
-export default function Hero() {
+export function Hero() {
   const go = (id) => () => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -57,6 +57,15 @@ export default function Hero() {
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+export default Hero;
+
+export function Services() {
+  return (
+    <section dir="rtl" id="services" className="pt-4">
       <div>
         <h2 className="text-lg font-bold text-white mb-3">خدماتنا</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
