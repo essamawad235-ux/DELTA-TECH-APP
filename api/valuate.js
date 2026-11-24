@@ -3,7 +3,7 @@
 const { normModel, normStorage } = require('./_hawary');
 
 const MODELS = new Set();
-['11', '12', '13', '14', '15', '16', '17'].forEach((n) => ['', ' plus', ' pro', ' pro max', ' mini'].forEach((s) => MODELS.add(n + s)));
+['11', '12', '13', '14', '15', '16', '17', '18'].forEach((n) => ['', ' plus', ' pro', ' pro max', ' mini'].forEach((s) => MODELS.add(n + s)));
 MODELS.add('air');
 const STORAGES = new Set([64, 128, 256, 512, 1024]);
 const hits = new Map();
