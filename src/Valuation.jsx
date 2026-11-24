@@ -53,7 +53,7 @@ function ValuationForm() {
   const msg = 'عايز أبيع أو أبدّل جهازي:\n' + spec + '\n' + quote;
 
   return (
-    <section id="valuation" className={card}>
+    <section id="valuation" style={{ scrollMarginTop: 150 }} className={card}>
       <h2 className="text-xl font-bold text-white mb-1">اعرف سعر جهازك قبل ما تيجي</h2>
       <p className="text-sm text-slate-400 mb-1">تقييم مبدئي للآيفون المستعمل. السعر النهائي بعد الفحص في الفرع.</p>
       {DEMO_UI && <div className={note + ' mb-2 font-bold'}>نسخة تجريبية: أي رقم هنا مش عرض حقيقي ومش معتمد.</div>}
@@ -125,11 +125,11 @@ function NewCatalog() {
   if (!d || d.status !== 'ok' || !d.items.length) return null;
   const items = [...d.items].sort((a, b) => Number(b.available) - Number(a.available));
   return (
-    <section id="new-iphone" className={card}>
+    <section id="new-iphone" style={{ scrollMarginTop: 150 }} className={card}>
       <h2 className="text-xl font-bold text-white mb-3">آيفون جديد بالطلب</h2>
       <p className={note + ' mb-2'}>
         الأجهزة دي مش موجودة في الفرع. بنجيبها بالطلب من المورد، والسعر والتوفر بيتأكدوا قبل التأكيد.
-        {d.updated ? ' آخر تحديث للقائمة: ' + d.updated : ''}
+        {d.updated ? <>{' آخر تحديث للقائمة: '}<span dir="ltr" style={{ whiteSpace: 'nowrap' }}>{d.updated}</span></> : null}
       </p>
       {items.map((i, k) => {
         const taxT = i.tax === 'exempt' ? 'معفي' : i.tax === 'taxed' ? 'عليه ضريبة' : null;
