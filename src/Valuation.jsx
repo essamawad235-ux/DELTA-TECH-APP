@@ -51,14 +51,14 @@ function ValuationForm() {
 
   const spec = f.model + ' ' + f.storage + 'GB، ' + (f.tax === 'exempt' ? 'معفي من الضريبة' : f.tax === 'taxed' ? 'عليه ضريبة' : 'الضريبة مش معروفة') + '، بطارية ' + f.battery + '%' +
     (f.back ? '، ظهر متغيّر' : '') + (f.screen ? '، شاشة متغيّرة' : '') + (f.noBox ? '، بدون علبة' : '') + (f.defect ? '، فيه عيب' : '');
-  const quote = res && res.status === 'ok' ? 'تقييم مبدئي ' + fmt(res.low) + ' إلى ' + fmt(res.high) + ' ج.م (تجربة محدودة، السعر النهائي بعد الفحص)' : 'محتاج فحص للتقييم';
+  const quote = res && res.status === 'ok' ? 'سعر شراء تقريبي من المحل ' + fmt(res.low) + ' إلى ' + fmt(res.high) + ' ج.م (تجربة محدودة، السعر النهائي بعد الفحص)' : 'محتاج فحص للتقييم';
   const notesClean = String(f.notes || '').replace(/\s+/g, ' ').trim().slice(0, 500);
   const msg = 'عايز أبيع أو أبدّل جهازي:\n' + spec + (notesClean ? '\nملاحظات: ' + notesClean : '') + '\n' + quote;
 
   return (
     <section id="valuation" style={{ scrollMarginTop: 150 }} className={card}>
       <h2 className="text-xl font-bold text-white mb-1">اعرف سعر جهازك قبل ما تيجي</h2>
-      <p className="text-sm text-slate-400 mb-1">تقييم مبدئي لآيفون 13 و14 و15 (128 جيجا) بشكل تقريبي بحالة سليمة وبالعلبة. باقي الأجهزة والحالات بتتقيّم بعد الفحص. السعر النهائي بعد الفحص في الفرع.</p>
+      <p className="text-sm text-slate-400 mb-1">تقييم مبدئي لآيفون 13 و15 (128 جيجا) بحالة سليمة وبالعلبة. الرقم ده سعر شراء تقريبي من المحل للجهاز، مش سعر بيعه. باقي الأجهزة والحالات بتتقيّم بعد الفحص. السعر النهائي بعد الفحص في الفرع.</p>
       {DEMO_UI && <div className={note + ' mb-2 font-bold'}>نسخة تجريبية: أي رقم هنا مش عرض حقيقي ومش معتمد.</div>}
       <form onSubmit={send}>
         <label className={lbl}>الموديل</label>
@@ -94,7 +94,7 @@ function ValuationForm() {
             نسخة تجريبية: الأرقام دي مش عرض حقيقي.</div>}
           <div className="text-2xl font-extrabold text-cyan-400">{fmt(res.low)} إلى {fmt(res.high)} ج.م</div>
           <div className="text-sm text-slate-300 mt-2">{spec}، بالعلبة، من غير تغيير قطع ولا عيوب</div>
-          <div className="text-sm text-slate-400 mt-1">تقييم مبدئي، والسعر النهائي بعد الفحص في الفرع.</div>
+          <div className="text-sm text-slate-400 mt-1">ده سعر شراء تقريبي من المحل، مش سعر بيعه. السعر النهائي بعد الفحص في الفرع.</div>
         </div>
       )}
       {res && res.status === 'inspection' && (
