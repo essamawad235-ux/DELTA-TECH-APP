@@ -997,7 +997,7 @@ export default function App() {
                   >
                     <div className="space-y-2">
                       {DEV_IMGS[item.deviceName] && (
-                        <img src={DEV_IMGS[item.deviceName]} alt={item.deviceName} loading="lazy" className="w-full h-40 object-cover rounded-xl mb-2" />
+                        <img src={DEV_IMGS[item.deviceName]} alt={item.deviceName} loading="lazy" className="w-full h-44 object-contain rounded-xl mb-2 bg-[#eef2f8]" />
                       )}
                       <div className="flex items-start justify-between gap-2">
                         <div>
