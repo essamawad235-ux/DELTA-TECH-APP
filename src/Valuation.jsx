@@ -49,7 +49,7 @@ function ValuationForm() {
 
   const spec = f.model + ' ' + f.storage + 'GB، ' + (f.tax === 'exempt' ? 'معفي من الضريبة' : f.tax === 'taxed' ? 'عليه ضريبة' : 'الضريبة مش معروفة') + '، بطارية ' + f.battery + '%' +
     (f.back ? '، ظهر متغيّر' : '') + (f.screen ? '، شاشة متغيّرة' : '') + (f.noBox ? '، بدون علبة' : '') + (f.defect ? '، فيه عيب' : '');
-  const quote = res && res.status === 'ok' ? 'تقييم مبدئي ' + fmt(res.low) + ' إلى ' + fmt(res.high) + ' ج.م' : 'محتاج فحص للتقييم';
+  const quote = res && res.status === 'ok' ? 'تقييم مبدئي ' + fmt(res.low) + ' إلى ' + fmt(res.high) + ' ج.م (تجربة محدودة، السعر النهائي بعد الفحص)' : 'محتاج فحص للتقييم';
   const notesClean = String(f.notes || '').replace(/\s+/g, ' ').trim().slice(0, 500);
   const msg = 'عايز أبيع أو أبدّل جهازي:\n' + spec + (notesClean ? '\nملاحظات: ' + notesClean : '') + '\n' + quote;
 
@@ -83,7 +83,7 @@ function ValuationForm() {
         <label className={lbl}>ملاحظات عن الجهاز (اختياري)</label>
         <textarea className={input} rows={3} maxLength={500} value={f.notes} placeholder="مثلاً: حالته، أي عيوب أو إصلاحات، الإكسسوارات، والسعر اللي ناوي عليه" onChange={(e) => set('notes', e.target.value)} />
         <div className="text-xs text-slate-500 mt-1">{String(f.notes || '').length} / 500</div>
-        <button className={btn + ' mt-4'} type="submit" disabled={busy}>{busy ? '...' : 'جهّز التفاصيل'}</button>
+        <button className={btn + ' mt-4'} type="submit" disabled={busy}>{busy ? '...' : 'احسب التقييم المبدئي'}</button>
       </form>
 
       {res && res.status === 'ok' && (
@@ -91,6 +91,7 @@ function ValuationForm() {
           {res.demo && <div className={note + ' mb-3 font-bold'}>
             نسخة تجريبية: الأرقام دي مش عرض حقيقي.</div>}
           <div className="text-2xl font-extrabold text-cyan-400">{fmt(res.low)} إلى {fmt(res.high)} ج.م</div>
+          <div className="text-sm text-slate-300 mt-2">{spec}، بالعلبة، من غير تغيير قطع ولا عيوب</div>
           <div className="text-sm text-slate-400 mt-1">تقييم مبدئي، والسعر النهائي بعد الفحص في الفرع.</div>
         </div>
       )}
