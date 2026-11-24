@@ -872,6 +872,23 @@ export default function App() {
               </div>
             </div>
 
+            <nav className="order-last sm:order-none w-full sm:w-auto flex gap-2">
+              <a
+                href="#valuation"
+                onClick={(e) => { const t = document.getElementById("valuation"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
+                className="flex-1 sm:flex-none text-center bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+              >
+                قيّم جهازك
+              </a>
+              <a
+                href="#new-iphone"
+                onClick={(e) => { const t = document.getElementById("new-iphone"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
+                className="flex-1 sm:flex-none text-center bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+              >
+                آيفون جديد
+              </a>
+            </nav>
+
             <button
               onClick={() => setShowLoginModal(true)}
               className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition"
@@ -965,7 +982,7 @@ export default function App() {
                 const displayPrice = Number(item.expectedSellPrice) || 0;
                 const isFocused = item.id === focusedDeviceId;
                 const waText = encodeURIComponent(
-                  `مرحباً ${SHOP_INFO.name}، كنت أستفسر عن جهاز: ${item.deviceName} (${item.specs || ""}) بسعر ${displayPrice.toLocaleString()} ج.م`
+                  `مرحباً ${SHOP_INFO.name}، كنت أستفسر عن جهاز: ${item.deviceName}${item.specs ? ` (${item.specs})` : ""}${displayPrice > 0 ? ` بسعر ${displayPrice.toLocaleString()} ج.م` : " وعايز أعرف السعر"}`
                 );
                 return (
                   <div
@@ -1881,4 +1898,4 @@ export default function App() {
       )}
     </div>
   );
-}
+          }
