@@ -1,5 +1,6 @@
 import LOGO from './logo.js';
 import Hero from './Hero.jsx';
+import DEV_IMGS from './devimgs.js';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import {
@@ -995,6 +996,9 @@ export default function App() {
                     }`}
                   >
                     <div className="space-y-2">
+                      {DEV_IMGS[item.deviceName] && (
+                        <img src={DEV_IMGS[item.deviceName]} alt={item.deviceName} loading="lazy" className="w-full h-40 object-cover rounded-xl mb-2" />
+                      )}
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <span className="inline-block text-[11px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md mb-1">
