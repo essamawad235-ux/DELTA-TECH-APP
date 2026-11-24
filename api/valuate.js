@@ -69,3 +69,5 @@ module.exports = async (req, res) => {
 function safeJson(s) {
   try { return JSON.parse(s); } catch (e) { return null; }
 }
+
+// pilot bands v1 (iPhone 13 128GB only)
