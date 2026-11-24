@@ -1,4 +1,5 @@
 import LOGO from './logo.js';
+import Hero from './Hero.jsx';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import {
@@ -898,6 +899,7 @@ export default function App() {
           </div>
         </header>
 
+        <Hero />
         <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
           <div className="bg-gradient-to-l from-cyan-950/60 to-slate-900 border border-cyan-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
