@@ -55,7 +55,7 @@ function ValuationForm() {
   return (
     <section id="valuation" style={{ scrollMarginTop: 150 }} className={card}>
       <h2 className="text-xl font-bold text-white mb-1">اعرف سعر جهازك قبل ما تيجي</h2>
-      <p className="text-sm text-slate-400 mb-1">تقييم مبدئي للآيفون المستعمل. السعر النهائي بعد الفحص في الفرع.</p>
+      <p className="text-sm text-slate-400 mb-1">التسعير التلقائي مش شغّال لسه. اكتب بيانات جهازك وابعتها على واتساب، والسعر بيتحدد بعد الفحص في الفرع.</p>
       {DEMO_UI && <div className={note + ' mb-2 font-bold'}>نسخة تجريبية: أي رقم هنا مش عرض حقيقي ومش معتمد.</div>}
       <form onSubmit={send}>
         <label className={lbl}>الموديل</label>
@@ -79,7 +79,7 @@ function ValuationForm() {
         <Check checked={f.screen} onChange={(v) => set('screen', v)}>الشاشة متغيّرة</Check>
         <Check checked={f.noBox} onChange={(v) => set('noBox', v)}>من غير علبة</Check>
         <Check checked={f.defect} onChange={(v) => set('defect', v)}>فيه عيب تاني (كاميرا، بصمة الوش، شاحن...)</Check>
-        <button className={btn} type="submit" disabled={busy}>{busy ? '...' : 'احسب التقييم'}</button>
+        <button className={btn} type="submit" disabled={busy}>{busy ? '...' : 'جهّز التفاصيل'}</button>
       </form>
 
       {res && res.status === 'ok' && (
@@ -97,12 +97,12 @@ function ValuationForm() {
       )}
       {res && res.status === 'demo_off' && (
         <div className="mt-4 p-4 rounded-xl bg-slate-800 text-slate-200 text-sm">
-          التقييم التلقائي لسه تحت التجربة. ابعتلنا التفاصيل على واتساب وهنقيّم جهازك.
+          التسعير التلقائي مش شغّال لسه. ابعتلنا التفاصيل على واتساب وهنقيّم جهازك بعد الفحص.
         </div>
       )}
       {res && res.status === 'disabled' && (
         <div className="mt-4 p-4 rounded-xl bg-slate-800 text-slate-200 text-sm">
-          التقييم التلقائي غير متاح دلوقتي. ابعتلنا التفاصيل على واتساب.
+          التسعير التلقائي مش شغّال دلوقتي. ابعتلنا تفاصيل الجهاز على واتساب وهنقيّمه بعد الفحص.
         </div>
       )}
       {res && res.status === 'error' && (
