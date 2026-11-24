@@ -25,7 +25,7 @@ function Check({ checked, onChange, children }) {
 }
 
 function ValuationForm() {
-  const [f, setF] = useState({ model: 'iPhone 13', storage: 128, tax: 'exempt', battery: 85, back: false, screen: false, noBox: false, defect: false });
+  const [f, setF] = useState({ model: 'iPhone 13', storage: 128, tax: 'exempt', battery: 85, back: false, screen: false, noBox: false, defect: false, notes: '' });
   const [res, setRes] = useState(null);
   const [busy, setBusy] = useState(false);
   const set = (k, v) => { setF({ ...f, [k]: v }); setRes(null); };
@@ -50,7 +50,8 @@ function ValuationForm() {
   const spec = f.model + ' ' + f.storage + 'GB، ' + (f.tax === 'exempt' ? 'معفي من الضريبة' : f.tax === 'taxed' ? 'عليه ضريبة' : 'الضريبة مش معروفة') + '، بطارية ' + f.battery + '%' +
     (f.back ? '، ظهر متغيّر' : '') + (f.screen ? '، شاشة متغيّرة' : '') + (f.noBox ? '، بدون علبة' : '') + (f.defect ? '، فيه عيب' : '');
   const quote = res && res.status === 'ok' ? 'تقييم مبدئي ' + fmt(res.low) + ' إلى ' + fmt(res.high) + ' ج.م' : 'محتاج فحص للتقييم';
-  const msg = 'عايز أبيع أو أبدّل جهازي:\n' + spec + '\n' + quote;
+  const notesClean = String(f.notes || '').replace(/\s+/g, ' ').trim().slice(0, 500);
+  const msg = 'عايز أبيع أو أبدّل جهازي:\n' + spec + (notesClean ? '\nملاحظات: ' + notesClean : '') + '\n' + quote;
 
   return (
     <section id="valuation" style={{ scrollMarginTop: 150 }} className={card}>
@@ -79,7 +80,10 @@ function ValuationForm() {
         <Check checked={f.screen} onChange={(v) => set('screen', v)}>الشاشة متغيّرة</Check>
         <Check checked={f.noBox} onChange={(v) => set('noBox', v)}>من غير علبة</Check>
         <Check checked={f.defect} onChange={(v) => set('defect', v)}>فيه عيب تاني (كاميرا، بصمة الوش، شاحن...)</Check>
-        <button className={btn} type="submit" disabled={busy}>{busy ? '...' : 'جهّز التفاصيل'}</button>
+        <label className={lbl}>ملاحظات عن الجهاز (اختياري)</label>
+        <textarea className={input} rows={3} maxLength={500} value={f.notes} placeholder="مثلاً: حالته، أي عيوب أو إصلاحات، الإكسسوارات، والسعر اللي ناوي عليه" onChange={(e) => set('notes', e.target.value)} />
+        <div className="text-xs text-slate-500 mt-1">{String(f.notes || '').length} / 500</div>
+        <button className={btn + ' mt-4'} type="submit" disabled={busy}>{busy ? '...' : 'جهّز التفاصيل'}</button>
       </form>
 
       {res && res.status === 'ok' && (
