@@ -8,7 +8,7 @@ const SERVICES = [
   { t: 'بيع وشراء موبايلات', d: 'جديد ومستعمل، وبنشتري جهازك بعد الفحص.', q: 'عايز أستفسر عن موبايل' },
   { t: 'سكرينات وسكنز بالليزر', d: 'قص مخصوص على مقاس جهازك.', q: 'عايز سكرينة ليزر لجهازي' },
   { t: 'إكسسوارات', d: 'جرابات وشواحن وسماعات.', q: 'عايز أسأل عن إكسسوارات' },
-  { t: 'صيانة موبايلات', d: 'تغيير بطارية وأعطال شائعة.', q: 'عايز أسأل عن صيانة' },
+  { t: 'صيانة موبايلات', d: 'فحص وإصلاح الأعطال.', q: 'عايز أسأل عن صيانة' },
 ];
 
 export default function Hero() {
@@ -44,14 +44,14 @@ export default function Hero() {
             </button>
           </div>
         </div>
-        <div className="bg-gradient-to-br from-slate-900 to-cyan-950/50 border border-cyan-500/30 rounded-2xl p-4 flex items-center gap-4">
-          <img src={HERO_IMG} alt="iPhone 14 Pro Max" className="dt-float w-32 h-32 md:w-44 md:h-44 rounded-xl object-cover shrink-0" />
-          <div className="space-y-1 min-w-0">
+        <div className="bg-gradient-to-br from-slate-900 to-cyan-950/50 border border-cyan-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
+          <img src={HERO_IMG} alt="iPhone 14 Pro Max" className="dt-float w-48 h-48 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-xl object-cover shrink-0" />
+          <div className="space-y-1 min-w-0 w-full text-center sm:text-right">
             <div className="text-xs font-bold text-amber-300">لقطة الأسبوع</div>
             <div className="text-lg font-bold text-white">iPhone 14 Pro Max</div>
             <div className="text-xs text-slate-300">128GB، بطارية 82%، ضهر متغيّر، معفي من الضريبة، من غير علبة</div>
             <div className="text-2xl font-extrabold text-cyan-300">36,000 جنيه</div>
-            <a href={wa('عايز أحجز iPhone 14 Pro Max بسعر 36,000')} target="_blank" rel="noreferrer" className="inline-block mt-1 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold">
+            <a href={wa('عايز أحجز iPhone 14 Pro Max بسعر 36,000')} target="_blank" rel="noreferrer" className="inline-block mt-1 px-4 py-2 whitespace-nowrap rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold">
               احجزه على واتساب
             </a>
           </div>
