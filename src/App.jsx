@@ -1,3 +1,4 @@
+import LOGO from './logo.js';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import {
@@ -863,9 +864,7 @@ export default function App() {
         <header className="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-30 backdrop-blur">
           <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="bg-cyan-500/10 border border-cyan-500/30 p-2.5 rounded-xl text-cyan-400">
-                <IconPhone className="w-6 h-6" />
-              </div>
+              <img src={LOGO} alt={SHOP_INFO.name} width="44" height="44" className="w-11 h-11 rounded-xl border border-cyan-500/30 object-cover" />
               <div>
                 <h1 className="text-xl font-bold tracking-wide text-white">{SHOP_INFO.name}</h1>
                 <p className="text-xs text-slate-400">{SHOP_INFO.address}</p>
@@ -1898,4 +1897,4 @@ export default function App() {
       )}
     </div>
   );
-          }
+    }
