@@ -14,6 +14,8 @@ const lbl = 'block text-xs text-slate-400 mt-4 mb-1.5';
 const btn = 'inline-block bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-xl text-sm font-semibold transition';
 const fmt = (n) => Number(n).toLocaleString('en-US');
 const wa = (text) => 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+const WA_AHMED = '201121410749';
+const waAhmed = (text) => 'https://wa.me/' + WA_AHMED + '?text=' + encodeURIComponent(text);
 const note = 'bg-amber-500/10 border border-amber-500/30 text-amber-200 px-4 py-3 rounded-xl text-sm';
 
 function Check({ checked, onChange, children }) {
@@ -115,7 +117,7 @@ function ValuationForm() {
       )}
       {res && res.status !== 'error' && (
         <p className="mt-4">
-          <a className={btn} href={wa(msg)} target="_blank" rel="noreferrer">بيع أو بدّل على واتساب</a>
+          <a className={btn} href={waAhmed(msg)} target="_blank" rel="noreferrer">بيع أو بدّل على واتساب</a>
         </p>
       )}
     </section>
@@ -131,9 +133,9 @@ function NewCatalog() {
   const items = [...d.items].sort((a, b) => Number(b.available) - Number(a.available));
   return (
     <section id="new-iphone" style={{ scrollMarginTop: 150 }} className={card}>
-      <h2 className="text-xl font-bold text-white mb-3">آيفون جديد بالطلب</h2>
+      <h2 className="text-xl font-bold text-white mb-3">آيفون جديد</h2>
       <p className={note + ' mb-2'}>
-        الأجهزة دي مش موجودة في الفرع. بنجيبها بالطلب من المورد، والسعر والتوفر بيتأكدوا قبل التأكيد.
+        أكّد التوفر والسعر على واتساب.
         {d.updated ? <>{' آخر تحديث للقائمة: '}<span dir="ltr" style={{ whiteSpace: 'nowrap' }}>{d.updated}</span></> : null}
       </p>
       {items.map((i, k) => {
@@ -148,7 +150,7 @@ function NewCatalog() {
             <div className="text-left shrink-0">
               <div className="font-bold text-cyan-400">{fmt(i.price)} ج.م</div>
               {i.available ? (
-                <a href={wa('عايز أسأل عن ' + t + ' (بالطلب من المورد) بسعر ' + fmt(i.price) + ' ج.م')} target="_blank" rel="noreferrer"
+                <a href={wa('عايز أسأل عن ' + t + ' بسعر ' + fmt(i.price) + ' ج.م، وعايز أتأكد من التوفر')} target="_blank" rel="noreferrer"
                   className="text-xs text-emerald-400 font-semibold">اطلب على واتساب</a>
               ) : <span className="text-xs text-slate-500">غير متاح حاليا</span>}
             </div>
