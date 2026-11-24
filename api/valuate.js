@@ -20,7 +20,7 @@ function limited(ip) {
 function parseRules() {
   try {
     const r = JSON.parse(process.env.VALUATION_RULES || '');
-    const ok = ['ratio', 'margin', 'batteryPct', 'backPct', 'screenPct', 'noBoxPct', 'maxAgeDays', 'roundTo'].every((k) => Number.isFinite(r[k]));
+    const ok = ['ratio', 'margin', 'batteryPct', 'backPct', 'noBoxPct', 'maxAgeDays', 'roundTo'].every((k) => Number.isFinite(r[k]));
     return ok ? r : null;
   } catch (e) {
     return null;
@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
     noBox: b.noBox === true,
     defect: b.otherDefect === true,
   };
-  if (!q.model || !MODELS.has(q.model) || !STORAGES.has(q.storage) || !['exempt', 'taxed'].includes(q.tax) ||
+  if (!q.model || !MODELS.has(q.model) || !STORAGES.has(q.storage) || !['exempt', 'taxed', 'unknown'].includes(q.tax) ||
       !Number.isFinite(q.battery) || q.battery < 50 || q.battery > 100) {
     return res.status(400).json({ status: 'error', message: 'invalid' });
   }
@@ -59,6 +59,10 @@ module.exports = async (req, res) => {
   const rules = parseRules();
   if (!rules) return res.status(200).json({ status: 'disabled' });
   if (q.defect) return res.status(200).json({ status: 'inspection', reason: 'defect' });
+  if (q.screen) return res.status(200).json({ status: 'inspection', reason: 'screen' });
+  if (q.tax === 'unknown') return res.status(200).json({ status: 'inspection', reason: 'tax' });
+  // Placeholder rules never produce numbers unless the page explicitly runs in marked demo mode.
+  if (rules.demo === true && b.demo !== true) return res.status(200).json({ status: 'demo_off' });
 
   const data = await load();
   if (!data || ageDays(data.updated) > rules.maxAgeDays) return res.status(200).json({ status: 'inspection', reason: 'stale' });
@@ -75,7 +79,6 @@ module.exports = async (req, res) => {
   let pct = 0;
   if (q.battery < refBattery) pct += (refBattery - q.battery) * rules.batteryPct; // only the gap vs the matched unit
   if (q.back) pct += rules.backPct;
-  if (q.screen) pct += rules.screenPct;
   if (q.noBox) pct += rules.noBoxPct;
   const buy = refPrice * rules.ratio * (1 - pct / 100) - rules.margin;
   if (!(buy > 0)) return res.status(200).json({ status: 'inspection', reason: 'low' });
