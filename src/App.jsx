@@ -1,3 +1,4 @@
+import LOGO from './logo.js';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import {
@@ -863,14 +864,29 @@ export default function App() {
         <header className="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-30 backdrop-blur">
           <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="bg-cyan-500/10 border border-cyan-500/30 p-2.5 rounded-xl text-cyan-400">
-                <IconPhone className="w-6 h-6" />
-              </div>
+              <img src={LOGO} alt={SHOP_INFO.name} width="44" height="44" className="w-11 h-11 rounded-xl border border-cyan-500/30 object-cover" />
               <div>
                 <h1 className="text-xl font-bold tracking-wide text-white">{SHOP_INFO.name}</h1>
                 <p className="text-xs text-slate-400">{SHOP_INFO.address}</p>
               </div>
             </div>
+
+            <nav className="order-last sm:order-none w-full sm:w-auto flex gap-2">
+              <a
+                href="#valuation"
+                onClick={(e) => { const t = document.getElementById("valuation"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
+                className="flex-1 sm:flex-none text-center bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+              >
+                قيّم جهازك
+              </a>
+              <a
+                href="#new-iphone"
+                onClick={(e) => { const t = document.getElementById("new-iphone"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
+                className="flex-1 sm:flex-none text-center bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+              >
+                آيفون جديد
+              </a>
+            </nav>
 
             <button
               onClick={() => setShowLoginModal(true)}
@@ -965,7 +981,7 @@ export default function App() {
                 const displayPrice = Number(item.expectedSellPrice) || 0;
                 const isFocused = item.id === focusedDeviceId;
                 const waText = encodeURIComponent(
-                  `مرحباً ${SHOP_INFO.name}، كنت أستفسر عن جهاز: ${item.deviceName} (${item.specs || ""}) بسعر ${displayPrice.toLocaleString()} ج.م`
+                  `مرحباً ${SHOP_INFO.name}، كنت أستفسر عن جهاز: ${item.deviceName}${item.specs ? ` (${item.specs})` : ""}${displayPrice > 0 ? ` بسعر ${displayPrice.toLocaleString()} ج.م` : " وعايز أعرف السعر"}`
                 );
                 return (
                   <div
@@ -1881,4 +1897,4 @@ export default function App() {
       )}
     </div>
   );
-}
+    }
