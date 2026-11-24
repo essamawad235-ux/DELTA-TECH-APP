@@ -1,5 +1,5 @@
 import LOGO from './logo.js';
-import Hero from './Hero.jsx';
+import Hero, { Services } from './Hero.jsx';
 import DEV_IMGS from './devimgs.js';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
@@ -1037,6 +1037,7 @@ export default function App() {
               })}
             </div>
           )}
+          <Services />
         </main>
 
         {/* نافذة تسجيل الدخول */}
