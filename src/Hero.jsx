@@ -25,7 +25,7 @@ export function Hero() {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
   return (
-    <section dir="rtl" className="relative overflow-hidden">
+    <section dir="rtl" className="relative border-b border-slate-800/70 bg-slate-950">
       <style>{`
         @keyframes dtUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
         @keyframes dtFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
@@ -40,26 +40,23 @@ export function Hero() {
         .dt-grid{background-image:linear-gradient(rgba(148,163,184,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.06) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%)}
         @media (prefers-reduced-motion:reduce){.dt-up,.dt-up2,.dt-up3,.dt-up4,.dt-float,.dt-glow{animation:none}}
       `}</style>
-      <div aria-hidden="true" className="dt-grid absolute inset-0" />
-      <div aria-hidden="true" className="dt-glow absolute -top-24 right-[-10%] w-[480px] h-[480px] rounded-full bg-cyan-500/20 blur-3xl" />
-      <div aria-hidden="true" className="dt-glow absolute top-40 left-[-10%] w-[420px] h-[420px] rounded-full bg-emerald-500/10 blur-3xl" />
-      <div className="relative max-w-7xl mx-auto px-4 pt-10 pb-6 md:pt-16 space-y-10">
+      <div className="relative max-w-7xl mx-auto px-4 pt-8 pb-4 md:pt-12 space-y-8">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div className="space-y-5">
             <div className="dt-up inline-flex items-center gap-2 text-xs font-semibold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-3 py-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400" /> الحصري، 6 أكتوبر
             </div>
-            <h1 className="dt-up text-4xl md:text-5xl font-extrabold text-white leading-tight">
-              موبايلات جديدة ومستعملة <span className="dt-grad">بسعر واضح</span> وفحص قدامك
+            <h1 className="dt-up text-3xl md:text-4xl font-bold text-white leading-snug">
+              موبايلات جديدة ومستعملة <span className="text-cyan-300">بسعر واضح</span> وفحص قدامك
             </h1>
             <p className="dt-up2 text-slate-300 text-base md:text-lg leading-relaxed max-w-xl">
               شوف الأجهزة المتاحة، أو قيّم جهازك مبدئياً، والسعر النهائي بعد الفحص في الفرع.
             </p>
             <div className="dt-up3 flex flex-wrap gap-3">
-              <button type="button" onClick={go('new-iphone')} className="px-6 py-3.5 rounded-2xl bg-gradient-to-l from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 text-slate-950 font-bold shadow-lg shadow-cyan-500/25 transition">
+              <button type="button" onClick={go('new-iphone')} className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition">
                 اشتري جهاز
               </button>
-              <button type="button" onClick={go('valuation')} className="px-6 py-3.5 rounded-2xl border border-cyan-400/50 text-cyan-200 hover:bg-cyan-500/10 font-bold transition">
+              <button type="button" onClick={go('valuation')} className="px-6 py-3 rounded-xl border border-slate-600 text-slate-100 hover:bg-cyan-500/10 font-bold transition">
                 بيع أو بدّل جهازك
               </button>
             </div>
@@ -71,14 +68,13 @@ export function Hero() {
           </div>
 
           <div className="dt-up2 relative">
-            <div aria-hidden="true" className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-cyan-500/25 via-transparent to-emerald-500/20 blur-2xl" />
-            <div className="relative bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/60 border border-cyan-400/30 rounded-3xl p-5 flex flex-col sm:flex-row items-center gap-5 shadow-2xl shadow-black/40">
-              <img src={HERO_IMG} alt="iPhone 14 Pro Max" className="dt-float w-56 h-56 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl object-cover shrink-0 ring-1 ring-white/10" />
+            <div className="relative bg-slate-900 border border-slate-700 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-5">
+              <img src={HERO_IMG} alt="iPhone 14 Pro Max" className="w-56 h-56 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl object-cover shrink-0 ring-1 ring-white/10" />
               <div className="space-y-1.5 min-w-0 w-full text-center sm:text-right">
                 <div className="inline-block text-xs font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 rounded-full px-2.5 py-0.5">لقطة الأسبوع</div>
                 <div className="text-xl font-bold text-white">iPhone 14 Pro Max</div>
                 <div className="text-xs text-slate-300 leading-relaxed">128GB، بطارية 82%، ضهر متغيّر، معفي من الضريبة، من غير علبة</div>
-                <div className="text-3xl font-extrabold text-cyan-300">36,000 <span className="text-base font-bold text-cyan-200/80">جنيه</span></div>
+                <div className="text-3xl font-bold text-white">36,000 <span className="text-base font-bold text-cyan-200/80">جنيه</span></div>
                 <a href={wa('عايز أحجز iPhone 14 Pro Max بسعر 36,000')} target="_blank" rel="noreferrer" className="inline-block mt-1 px-5 py-2.5 whitespace-nowrap rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold transition">
                   احجزه على واتساب
                 </a>
@@ -89,7 +85,7 @@ export function Hero() {
 
         <div className="grid sm:grid-cols-3 gap-3">
           {STEPS.map((s) => (
-            <div key={s.n} className="flex items-start gap-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+            <div key={s.n} className="flex items-start gap-3 bg-slate-900 border border-slate-800 rounded-xl p-4">
               <div className="shrink-0 w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-extrabold flex items-center justify-center">{s.n}</div>
               <div>
                 <div className="font-bold text-white text-sm">{s.t}</div>
@@ -109,11 +105,11 @@ export function Services() {
   return (
     <section dir="rtl" id="services" className="pt-6" style={{ scrollMarginTop: 120 }}>
       <div>
-        <h2 className="text-2xl font-extrabold text-white mb-1">خدماتنا</h2>
+        <h2 className="text-xl font-bold text-white mb-1">خدماتنا</h2>
         <p className="text-sm text-slate-400 mb-4">اضغط على أي خدمة واسأل مباشرة على واتساب.</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {SERVICES.map((s) => (
-            <a key={s.t} href={wa(s.q)} target="_blank" rel="noreferrer" className="group block bg-gradient-to-b from-slate-900 to-slate-900/50 border border-slate-800 hover:border-cyan-400/60 hover:-translate-y-0.5 rounded-2xl p-4 transition">
+            <a key={s.t} href={wa(s.q)} target="_blank" rel="noreferrer" className="group block bg-slate-900 border border-slate-800 hover:border-slate-600 rounded-xl p-4 transition">
               <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-xl mb-3" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: s.i }} /></div>
               <div className="font-bold text-white text-sm">{s.t}</div>
               <div className="text-xs text-slate-400 mt-1 leading-relaxed">{s.d}</div>
