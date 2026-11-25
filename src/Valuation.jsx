@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SiteFooter } from './Hero.jsx';
 
 const WA = '201111860871';
 const MODELS = ['iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max', 'iPhone 12', 'iPhone 12 Pro', 'iPhone 12 Pro Max',
@@ -8,7 +9,7 @@ const MODELS = ['iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max', 'iPhone 12', 
 const STORAGES = [64, 128, 256, 512, 1024];
 
 const DEMO_UI = typeof window !== 'undefined' && /[?&]demo=1/.test(window.location.search);
-const card = 'bg-gradient-to-b from-slate-900 to-slate-900/60 border border-cyan-500/20 rounded-2xl p-5 sm:p-6 scroll-mt-28 shadow-lg shadow-black/20';
+const card = 'bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 scroll-mt-28';
 const input = 'w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base text-white focus:outline-none focus:border-cyan-500';
 const lbl = 'block text-xs text-slate-400 mt-4 mb-1.5';
 const btn = 'inline-block bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-xl text-sm font-semibold transition';
@@ -92,7 +93,7 @@ function ValuationForm() {
         <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
           {res.demo && <div className={note + ' mb-3 font-bold'}>
             نسخة تجريبية: الأرقام دي مش عرض حقيقي.</div>}
-          <div className="text-2xl font-extrabold text-cyan-400">{fmt(res.low)} إلى {fmt(res.high)} ج.م</div>
+          <div className="text-xl font-bold text-cyan-400">{fmt(res.low)} إلى {fmt(res.high)} ج.م</div>
           <div className="text-sm text-slate-300 mt-2">{spec}، بالعلبة، من غير تغيير قطع ولا عيوب</div>
           <div className="text-sm text-slate-400 mt-1">ده سعر شراء تقريبي من المحل، مش سعر بيعه. السعر النهائي بعد الفحص في الفرع.</div>
         </div>
@@ -148,7 +149,7 @@ function NewCatalog() {
               <div className="text-xs text-slate-400 mt-0.5">{[taxT, i.esim ? 'e-SIM' : null, i.color].concat(i.tags).filter(Boolean).filter((x, j, a) => a.indexOf(x) === j).join(' · ')}</div>
             </div>
             <div className="text-left shrink-0">
-              <div className="font-bold text-cyan-400">{fmt(i.price)} ج.م</div>
+              <div className="font-bold text-white text-lg">{fmt(i.price)} ج.م</div>
               {i.available ? (
                 <a href={wa('عايز أسأل عن ' + t + ' بسعر ' + fmt(i.price) + ' ج.م، وعايز أتأكد من التوفر')} target="_blank" rel="noreferrer"
                   className="text-xs text-emerald-400 font-semibold">اطلب على واتساب</a>
@@ -168,6 +169,7 @@ export default function Valuation() {
         <ValuationForm />
         <NewCatalog />
       </div>
+      <div className="mt-12"><SiteFooter /></div>
     </div>
   );
 }
