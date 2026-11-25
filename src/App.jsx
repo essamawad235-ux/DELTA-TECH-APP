@@ -12,8 +12,6 @@ import {
   getFirestore,
   collection,
   addDoc,
-  updateDoc,
-  deleteDoc,
   doc,
   onSnapshot,
   serverTimestamp,
@@ -35,6 +33,16 @@ const firebaseConfig = {
 };
 
 const appId = "delta-tech-app";
+const PUBLIC_CATALOG_FIELDS = ["deviceName", "deviceType", "specs", "expectedSellPrice", "status", "orderIndex"];
+// حقول العرض العامة فقط، بدون أسعار شراء أو سيريال أو ملاحظات أو أسماء موردين
+const toPublicCatalogDoc = (d, createdAt) => {
+  const o = {};
+  PUBLIC_CATALOG_FIELDS.forEach((k) => {
+    o[k] = d[k] === undefined ? null : d[k];
+  });
+  o.createdAt = createdAt || d.createdAt || serverTimestamp();
+  return o;
+};
 const ADMIN_EMAIL = "admin@delta.com";
 const DEFAULT_CAPITAL = 175000;
 
@@ -286,7 +294,7 @@ export default function App() {
       appId,
       "public",
       "data",
-      "devices"
+      user ? "devices" : "public_catalog"
     );
 
     const unsubscribeData = onSnapshot(
@@ -314,6 +322,59 @@ export default function App() {
 
     return () => unsubscribeData();
   }, [user]);
+
+  // نسخة عامة للزوار: الأجهزة المتاحة فقط وبحقول العرض فقط (بدون أسعار شراء أو سيريال أو أسماء موردين)
+  const [publicCatalogDocs, setPublicCatalogDocs] = useState(null);
+  useEffect(() => {
+    if (!user) {
+      setPublicCatalogDocs(null);
+      return;
+    }
+    const unsub = onSnapshot(
+      collection(db, "artifacts", appId, "public", "data", "public_catalog"),
+      (snap) => {
+        const m = {};
+        snap.docs.forEach((d) => {
+          m[d.id] = d.data();
+        });
+        setPublicCatalogDocs(m);
+      },
+      (err) => console.error("public_catalog error:", err)
+    );
+    return () => unsub();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || dataLoading || publicCatalogDocs === null) return;
+    const PUBLIC_FIELDS = PUBLIC_CATALOG_FIELDS;
+    const desired = {};
+    devices.forEach((d) => {
+      if (d.status !== "متاح") return;
+      const o = {};
+      PUBLIC_FIELDS.forEach((k) => {
+        o[k] = d[k] === undefined ? null : d[k];
+      });
+      desired[d.id] = { ...o, createdAt: d.createdAt || serverTimestamp() };
+    });
+    const batch = writeBatch(db);
+    let ops = 0;
+    Object.keys(desired).forEach((id) => {
+      const cur = publicCatalogDocs[id];
+      const same =
+        cur && PUBLIC_FIELDS.every((k) => (cur[k] === undefined ? null : cur[k]) === desired[id][k]);
+      if (!same && ops < 400) {
+        batch.set(doc(db, "artifacts", appId, "public", "data", "public_catalog", id), desired[id]);
+        ops++;
+      }
+    });
+    Object.keys(publicCatalogDocs).forEach((id) => {
+      if (!desired[id] && ops < 400) {
+        batch.delete(doc(db, "artifacts", appId, "public", "data", "public_catalog", id));
+        ops++;
+      }
+    });
+    if (ops > 0) batch.commit().catch((err) => console.error("public_catalog sync error:", err));
+  }, [user, devices, dataLoading, publicCatalogDocs]);
 
   // جلب رأس المال وسجل الرقابة للمدير
   useEffect(() => {
@@ -444,7 +505,10 @@ export default function App() {
         notes: quickSellNotes.trim(),
         updatedAt: serverTimestamp(),
       };
-      await updateDoc(docRef, updatedFields);
+      const sellBatch = writeBatch(db);
+      sellBatch.update(docRef, updatedFields);
+      sellBatch.delete(doc(db, "artifacts", appId, "public", "data", "public_catalog", sellingItem.id));
+      await sellBatch.commit();
       await recordAuditLog(
         "تسجيل بيع سريع",
         sellingItem.deviceName,
@@ -494,6 +558,12 @@ export default function App() {
 
       GOOGLE_SHEETS_DEVICES.forEach((item, index) => {
         const newDocRef = doc(colRef);
+        if ((item.status || "متاح") === "متاح") {
+          batch.set(
+            doc(db, "artifacts", appId, "public", "data", "public_catalog", newDocRef.id),
+            toPublicCatalogDoc({ ...item, status: "متاح", orderIndex: index + 1 })
+          );
+        }
         batch.set(newDocRef, {
           orderIndex: index + 1,
           deviceName: item.deviceName,
@@ -547,6 +617,20 @@ export default function App() {
         if (!cols[0]) continue;
 
         const newDocRef = doc(colRef);
+        const csvStatus = cols[7] && ["متاح", "مباع", "صيانة"].includes(cols[7]) ? cols[7] : "متاح";
+        if (csvStatus === "متاح") {
+          batch.set(
+            doc(db, "artifacts", appId, "public", "data", "public_catalog", newDocRef.id),
+            toPublicCatalogDoc({
+              deviceName: cols[0] || "جهاز غير محدد",
+              deviceType: DEVICE_TYPES.includes(cols[1]) ? cols[1] : "موبايل",
+              specs: cols[2] || "",
+              expectedSellPrice: Number(cols[5]) || 0,
+              status: "متاح",
+              orderIndex: null,
+            })
+          );
+        }
         batch.set(newDocRef, {
           deviceName: cols[0] || "جهاز غير محدد",
           deviceType: DEVICE_TYPES.includes(cols[1]) ? cols[1] : "موبايل",
@@ -802,7 +886,18 @@ export default function App() {
     try {
       if (editingItem) {
         const docRef = doc(db, "artifacts", appId, "public", "data", "devices", editingItem.id);
-        await updateDoc(docRef, payload);
+        const editBatch = writeBatch(db);
+        editBatch.update(docRef, payload);
+        const pubRef = doc(db, "artifacts", appId, "public", "data", "public_catalog", editingItem.id);
+        if (payload.status === "متاح") {
+          editBatch.set(
+            pubRef,
+            toPublicCatalogDoc({ ...payload, orderIndex: editingItem.orderIndex }, editingItem.createdAt)
+          );
+        } else {
+          editBatch.delete(pubRef);
+        }
+        await editBatch.commit();
         await recordAuditLog(
           "تعديل جهاز",
           payload.deviceName,
@@ -810,11 +905,20 @@ export default function App() {
         );
       } else {
         const colRef = collection(db, "artifacts", appId, "public", "data", "devices");
-        await addDoc(colRef, {
+        const newRef = doc(colRef);
+        const newBatch = writeBatch(db);
+        newBatch.set(newRef, {
           ...payload,
           orderIndex: devices.length + 1,
           createdAt: serverTimestamp(),
         });
+        if (payload.status === "متاح") {
+          newBatch.set(
+            doc(db, "artifacts", appId, "public", "data", "public_catalog", newRef.id),
+            toPublicCatalogDoc({ ...payload, orderIndex: devices.length + 1 })
+          );
+        }
+        await newBatch.commit();
         await recordAuditLog(
           "إضافة جهاز جديد",
           payload.deviceName,
@@ -832,7 +936,10 @@ export default function App() {
     if (!isAdmin) return;
     if (!window.confirm(`هل أنت متأكد من حذف "${item.deviceName}" نهائياً؟`)) return;
     try {
-      await deleteDoc(doc(db, "artifacts", appId, "public", "data", "devices", item.id));
+      const delBatch = writeBatch(db);
+      delBatch.delete(doc(db, "artifacts", appId, "public", "data", "devices", item.id));
+      delBatch.delete(doc(db, "artifacts", appId, "public", "data", "public_catalog", item.id));
+      await delBatch.commit();
       await recordAuditLog("حذف جهاز", item.deviceName, `سيريال: ${item.imei || "—"}`);
     } catch (err) {
       console.error("Delete error:", err);
