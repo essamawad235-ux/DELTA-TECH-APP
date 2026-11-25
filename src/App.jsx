@@ -866,7 +866,7 @@ export default function App() {
   if (!isStaff) {
     return (
       <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-        <header className="bg-slate-950/80 border-b border-slate-800/80 sticky top-0 z-30 backdrop-blur-xl">
+        <header className="bg-slate-950/90 border-b border-slate-800/80 sm:sticky sm:top-0 z-30 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <img src={LOGO} alt={SHOP_INFO.name} width="44" height="44" className="w-11 h-11 rounded-xl border border-cyan-500/30 object-cover" />
