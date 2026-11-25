@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SiteFooter } from './Hero.jsx';
 
 const WA = '201111860871';
 const MODELS = ['iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max', 'iPhone 12', 'iPhone 12 Pro', 'iPhone 12 Pro Max',
@@ -8,7 +9,7 @@ const MODELS = ['iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max', 'iPhone 12', 
 const STORAGES = [64, 128, 256, 512, 1024];
 
 const DEMO_UI = typeof window !== 'undefined' && /[?&]demo=1/.test(window.location.search);
-const card = 'bg-gradient-to-b from-slate-900 to-slate-900/60 border border-cyan-500/20 rounded-2xl p-5 sm:p-6 scroll-mt-28 shadow-lg shadow-black/20';
+const card = 'bg-gradient-to-b from-slate-900 to-slate-900/60 border border-cyan-500/25 rounded-3xl p-5 sm:p-7 scroll-mt-28 shadow-lg shadow-black/20';
 const input = 'w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base text-white focus:outline-none focus:border-cyan-500';
 const lbl = 'block text-xs text-slate-400 mt-4 mb-1.5';
 const btn = 'inline-block bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-xl text-sm font-semibold transition';
@@ -57,7 +58,7 @@ function ValuationForm() {
 
   return (
     <section id="valuation" style={{ scrollMarginTop: 150 }} className={card}>
-      <h2 className="text-xl font-bold text-white mb-1">اعرف سعر جهازك قبل ما تيجي</h2>
+      <h2 className="text-2xl font-extrabold text-white mb-1">اعرف سعر جهازك قبل ما تيجي</h2>
       <p className="text-sm text-slate-400 mb-1">تقييم مبدئي لآيفون 13 و15 (128 جيجا) بحالة سليمة وبالعلبة. الرقم ده سعر شراء تقريبي من المحل للجهاز، مش سعر بيعه. باقي الأجهزة والحالات بتتقيّم بعد الفحص. السعر النهائي بعد الفحص في الفرع.</p>
       {DEMO_UI && <div className={note + ' mb-2 font-bold'}>نسخة تجريبية: أي رقم هنا مش عرض حقيقي ومش معتمد.</div>}
       <form onSubmit={send}>
@@ -133,7 +134,7 @@ function NewCatalog() {
   const items = [...d.items].sort((a, b) => Number(b.available) - Number(a.available));
   return (
     <section id="new-iphone" style={{ scrollMarginTop: 150 }} className={card}>
-      <h2 className="text-xl font-bold text-white mb-3">آيفون جديد</h2>
+      <h2 className="text-2xl font-extrabold text-white mb-3">آيفون جديد</h2>
       <p className={note + ' mb-2'}>
         أكّد التوفر والسعر على واتساب.
         {d.updated ? <>{' آخر تحديث للقائمة: '}<span dir="ltr" style={{ whiteSpace: 'nowrap' }}>{d.updated}</span></> : null}
@@ -168,6 +169,7 @@ export default function Valuation() {
         <ValuationForm />
         <NewCatalog />
       </div>
+      <div className="mt-12"><SiteFooter /></div>
     </div>
   );
 }
