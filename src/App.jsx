@@ -880,7 +880,7 @@ export default function App() {
               <a
                 href="#valuation"
                 onClick={(e) => { const t = document.getElementById("valuation"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
-                className="flex-1 sm:flex-none text-center bg-gradient-to-l from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-cyan-500/20 transition"
+                className="flex-1 sm:flex-none text-center bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 py-2.5 rounded-xl text-sm font-bold transition"
               >
                 قيّم جهازك
               </a>
@@ -912,9 +912,9 @@ export default function App() {
 
         <Hero />
         <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-          <div className="bg-gradient-to-l from-cyan-950/50 to-slate-900/70 border border-cyan-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
-              <h2 className="text-2xl font-extrabold text-white">الأجهزة المتاحة حالياً</h2>
+              <h2 className="text-xl font-bold text-white">الأجهزة المتاحة حالياً</h2>
               <p className="text-sm text-slate-300">
                 تصفح الأجهزة المتوفرة لدينا بالمواصفات والأسعار — {SHOP_INFO.address}
               </p>
@@ -999,7 +999,7 @@ export default function App() {
                 return (
                   <div
                     key={item.id}
-                    className={`bg-gradient-to-b from-slate-900 to-slate-900/60 rounded-2xl p-5 flex flex-col justify-between gap-4 transition border hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/5 ${
+                    className={`bg-slate-900 rounded-xl p-5 flex flex-col justify-between gap-4 transition border ${
                       isFocused
                         ? "border-cyan-400 ring-2 ring-cyan-500/30"
                         : "border-slate-800 hover:border-cyan-500/40"
@@ -1025,7 +1025,7 @@ export default function App() {
                     <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
                       <div>
                         <div className="text-[11px] text-slate-500">السعر</div>
-                        <div className="text-xl font-bold text-cyan-400">
+                        <div className="text-2xl font-bold text-white">
                           {displayPrice > 0 ? `${displayPrice.toLocaleString()} ج.م` : "تواصل للسعر"}
                         </div>
                       </div>
