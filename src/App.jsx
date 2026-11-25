@@ -219,6 +219,10 @@ export default function App() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const isStaff = Boolean(user);
+  useEffect(() => {
+    const el = document.getElementById('delta-extra');
+    if (el) el.style.display = isStaff ? 'none' : '';
+  }, [isStaff]);
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   // تبويب الإدارة (الأجهزة / سجل الرقابة)
@@ -862,13 +866,13 @@ export default function App() {
   if (!isStaff) {
     return (
       <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-        <header className="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-30 backdrop-blur">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+        <header className="bg-slate-950/80 border-b border-slate-800/80 sticky top-0 z-30 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <img src={LOGO} alt={SHOP_INFO.name} width="44" height="44" className="w-11 h-11 rounded-xl border border-cyan-500/30 object-cover" />
               <div>
-                <h1 className="text-xl font-bold tracking-wide text-white">{SHOP_INFO.name}</h1>
-                <p className="text-xs text-slate-400">{SHOP_INFO.address}</p>
+                <h1 className="text-lg sm:text-xl font-extrabold tracking-wide text-white">{SHOP_INFO.name}</h1>
+                <p className="text-[11px] sm:text-xs text-slate-400">{SHOP_INFO.address}</p>
               </div>
             </div>
 
@@ -876,24 +880,31 @@ export default function App() {
               <a
                 href="#valuation"
                 onClick={(e) => { const t = document.getElementById("valuation"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
-                className="flex-1 sm:flex-none text-center bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+                className="flex-1 sm:flex-none text-center bg-gradient-to-l from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-cyan-500/20 transition"
               >
                 قيّم جهازك
               </a>
               <a
                 href="#new-iphone"
                 onClick={(e) => { const t = document.getElementById("new-iphone"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
-                className="flex-1 sm:flex-none text-center bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+                className="flex-1 sm:flex-none text-center bg-slate-900 hover:bg-slate-800 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-xl text-sm font-semibold transition"
               >
                 آيفون جديد
+              </a>
+              <a
+                href="#services"
+                onClick={(e) => { const t = document.getElementById("services"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
+                className="hidden sm:inline-block text-center bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+              >
+                خدماتنا
               </a>
             </nav>
 
             <button
               onClick={() => setShowLoginModal(true)}
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition"
+              className="flex items-center gap-2 text-slate-500 hover:text-cyan-300 px-2 py-2 rounded-xl text-[11px] sm:text-xs transition"
             >
-              <IconLock className="w-4 h-4" />
+              <IconLock className="w-3.5 h-3.5" />
               <span>دخول الموظفين / الإدارة</span>
             </button>
           </div>
@@ -901,9 +912,9 @@ export default function App() {
 
         <Hero />
         <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-          <div className="bg-gradient-to-l from-cyan-950/60 to-slate-900 border border-cyan-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-gradient-to-l from-cyan-950/50 to-slate-900/70 border border-cyan-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-white">الأجهزة المتاحة حالياً</h2>
+              <h2 className="text-2xl font-extrabold text-white">الأجهزة المتاحة حالياً</h2>
               <p className="text-sm text-slate-300">
                 تصفح الأجهزة المتوفرة لدينا بالمواصفات والأسعار — {SHOP_INFO.address}
               </p>
@@ -988,7 +999,7 @@ export default function App() {
                 return (
                   <div
                     key={item.id}
-                    className={`bg-slate-900 rounded-2xl p-5 flex flex-col justify-between gap-4 transition border ${
+                    className={`bg-gradient-to-b from-slate-900 to-slate-900/60 rounded-2xl p-5 flex flex-col justify-between gap-4 transition border hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/5 ${
                       isFocused
                         ? "border-cyan-400 ring-2 ring-cyan-500/30"
                         : "border-slate-800 hover:border-cyan-500/40"
@@ -1023,7 +1034,7 @@ export default function App() {
                         href={`https://wa.me/${SHOP_INFO.whatsapp}?text=${waText}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition"
+                        className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-bold transition"
                       >
                         تواصل واتساب
                       </a>
@@ -1106,9 +1117,7 @@ export default function App() {
       <header className="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-30 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-cyan-500/10 border border-cyan-500/30 p-2.5 rounded-xl text-cyan-400">
-              <IconPhone className="w-6 h-6" />
-            </div>
+            <img src={LOGO} alt={SHOP_INFO.name} width="44" height="44" className="w-11 h-11 rounded-xl border border-cyan-500/30 object-cover" />
             <div>
               <h1 className="text-xl font-bold tracking-wide text-white">{SHOP_INFO.name}</h1>
               <p className="text-xs text-slate-400">حسابات الأجهزة • {SHOP_INFO.address}</p>
