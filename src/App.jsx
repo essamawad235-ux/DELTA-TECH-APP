@@ -889,6 +889,14 @@ export default function App() {
                 آيفون جديد
               </a>
               <a
+                href={`https://wa.me/${SHOP_INFO.whatsapp}?text=${encodeURIComponent("عايز أسأل عن آيفون معين: ")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 sm:flex-none text-center bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2.5 rounded-xl text-sm font-extrabold transition"
+              >
+                واتساب
+              </a>
+              <a
                 href="#services"
                 onClick={(e) => { const t = document.getElementById("services"); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); } }}
                 className="hidden sm:inline-block text-center bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition"
@@ -906,6 +914,23 @@ export default function App() {
             </button>
           </div>
         </header>
+        <section className="max-w-7xl mx-auto px-4 pt-5">
+          <div className="rounded-2xl border border-emerald-500/30 bg-slate-900/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-white">عندنا كمان آيفونات تانية</h2>
+              <p className="text-sm sm:text-base text-slate-300 mt-1">مش لاقي الجهاز اللي عايزه؟ ابعتلنا اسم الموديل والمساحة على واتساب ونرد عليك بالمتاح والسعر.</p>
+            </div>
+            <a
+              href={`https://wa.me/${SHOP_INFO.whatsapp}?text=${encodeURIComponent("عايز أسأل عن آيفون معين: ")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 text-center bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-8 py-4 rounded-2xl text-lg font-extrabold transition"
+            >
+              ابعتلنا على واتساب
+            </a>
+          </div>
+        </section>
+
 
         <Hero />
         <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
