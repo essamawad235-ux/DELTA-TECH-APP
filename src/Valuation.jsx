@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SiteFooter } from './Hero.jsx';
+import NeighborCatalog from './NeighborCatalog.jsx';
 
 const WA = '201111860871';
 const MODELS = ['iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max', 'iPhone 12', 'iPhone 12 Pro', 'iPhone 12 Pro Max',
@@ -169,6 +170,7 @@ export default function Valuation() {
         <ValuationForm />
         <NewCatalog />
       </div>
+      <div className="max-w-7xl mx-auto px-4 mt-4"><NeighborCatalog /></div>
       <div className="mt-12"><SiteFooter /></div>
     </div>
   );
