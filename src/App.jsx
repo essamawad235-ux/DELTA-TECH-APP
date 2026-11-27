@@ -53,8 +53,12 @@ const SHOP_INFO = {
   whatsapp: "201111860871",
 };
 
-const OTHER_ACCOUNT = "بيكا";
-const isOtherAccount = (d) => d && d.clientOrSupplier === OTHER_ACCOUNT;
+const OTHER_ACCOUNTS = ["بيكا", "الهواري"];
+const OTHER_ACCOUNT_LABELS = {
+  "بيكا": { due: "مستحق لبيكا", cost: "بتكلفة بيكا" },
+  "الهواري": { due: "مستحق للهواري", cost: "بتكلفة الهواري" },
+};
+const isOtherAccount = (d) => d && OTHER_ACCOUNTS.includes(d.clientOrSupplier);
 const DEVICE_TYPES = ["موبايل", "تابلت", "ساعة", "بلايستيشن", "لابتوب", "أخرى"];
 
 const INVOICE_TERMS = [
@@ -729,13 +733,20 @@ export default function App() {
 
   // الإحصائيات المالية
   const stats = useMemo(() => {
-    const otherDevices = devices.filter(isOtherAccount);
     const ownDevices = devices.filter((d) => !isOtherAccount(d));
-    const otherSold = otherDevices.filter((d) => d.status === "مباع");
-    const otherAvailable = otherDevices.filter((d) => d.status === "متاح" || d.status === "صيانة");
-    const otherDue = otherSold.reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0);
-    const otherProfit = otherSold.reduce((sum, d) => sum + ((Number(d.sellPrice) || 0) - (Number(d.buyPrice) || 0)), 0);
-    const otherStockCost = otherAvailable.reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0);
+    const otherByAccount = {};
+    OTHER_ACCOUNTS.forEach((acc) => {
+      const devs = devices.filter((d) => d.clientOrSupplier === acc);
+      const sold = devs.filter((d) => d.status === "مباع");
+      const available = devs.filter((d) => d.status === "متاح" || d.status === "صيانة");
+      otherByAccount[acc] = {
+        soldCount: sold.length,
+        availableCount: available.length,
+        due: sold.reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0),
+        profit: sold.reduce((sum, d) => sum + ((Number(d.sellPrice) || 0) - (Number(d.buyPrice) || 0)), 0),
+        stockCost: available.reduce((sum, d) => sum + (Number(d.buyPrice) || 0), 0),
+      };
+    });
     const totalDevices = ownDevices.length;
     const availableDevices = ownDevices.filter((d) => d.status === "متاح" || d.status === "صيانة");
     const availableCount = availableDevices.length;
@@ -767,11 +778,7 @@ export default function App() {
       inventoryCost,
       remainingCapitalCash,
       totalCashInHand,
-      otherSoldCount: otherSold.length,
-      otherAvailableCount: otherAvailable.length,
-      otherDue,
-      otherProfit,
-      otherStockCost,
+      otherByAccount,
     };
   }, [devices, originalCapital]);
 
@@ -786,8 +793,9 @@ export default function App() {
       return isAvailable && matchesType && matchesSearch;
     });
 
-    if (!focusedDeviceId) return list;
-    return [...list].sort((a, b) => (a.id === focusedDeviceId ? -1 : b.id === focusedDeviceId ? 1 : 0));
+    const sorted = [...list].sort((a, b) => (Number(b.expectedSellPrice) || 0) - (Number(a.expectedSellPrice) || 0));
+    if (!focusedDeviceId) return sorted;
+    return [...sorted].sort((a, b) => (a.id === focusedDeviceId ? -1 : b.id === focusedDeviceId ? 1 : 0));
   }, [devices, searchTerm, typeFilter, focusedDeviceId]);
 
   const focusedDeviceNotAvailable = useMemo(() => {
@@ -1471,31 +1479,37 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-amber-500/30 p-5 rounded-2xl space-y-3">
+            {OTHER_ACCOUNTS.map((acc) => {
+              const oa = stats.otherByAccount[acc] || { soldCount: 0, availableCount: 0, due: 0, profit: 0, stockCost: 0 };
+              const labels = OTHER_ACCOUNT_LABELS[acc] || { due: `مستحق لـ${acc}`, cost: `بتكلفة ${acc}` };
+              return (
+            <div key={acc} className="bg-slate-900 border border-amber-500/30 p-5 rounded-2xl space-y-3">
               <div className="border-b border-slate-800 pb-2.5">
-                <h2 className="text-sm font-bold text-amber-300">حساب بيكا (منفصل عن رأس المال والأرباح)</h2>
-                <p className="text-[11px] text-slate-500 mt-1">أجهزة حساب بيكا مش داخلة في رأس المال ولا في توزيع 40/60.</p>
+                <h2 className="text-sm font-bold text-amber-300">حساب {acc} (منفصل عن رأس المال والأرباح)</h2>
+                <p className="text-[11px] text-slate-500 mt-1">أجهزة حساب {acc} مش داخلة في رأس المال ولا في توزيع 40/60.</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-950/70 border border-slate-800 p-3 rounded-xl">
                   <div className="text-xs text-slate-400 mb-1">متاح</div>
-                  <div className="text-lg font-bold text-white">{stats.otherAvailableCount} جهاز</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">بتكلفة بيكا: {stats.otherStockCost.toLocaleString()} ج.م</div>
+                  <div className="text-lg font-bold text-white">{oa.availableCount} جهاز</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">{labels.cost}: {oa.stockCost.toLocaleString()} ج.م</div>
                 </div>
                 <div className="bg-slate-950/70 border border-slate-800 p-3 rounded-xl">
                   <div className="text-xs text-slate-400 mb-1">اتباع</div>
-                  <div className="text-lg font-bold text-white">{stats.otherSoldCount} جهاز</div>
+                  <div className="text-lg font-bold text-white">{oa.soldCount} جهاز</div>
                 </div>
                 <div className="bg-slate-950/70 border border-amber-500/20 p-3 rounded-xl">
-                  <div className="text-xs text-amber-400 mb-1">مستحق لبيكا</div>
-                  <div className="text-lg font-bold text-amber-300">{stats.otherDue.toLocaleString()} <span className="text-xs font-normal">ج.م</span></div>
+                  <div className="text-xs text-amber-400 mb-1">{labels.due}</div>
+                  <div className="text-lg font-bold text-amber-300">{oa.due.toLocaleString()} <span className="text-xs font-normal">ج.م</span></div>
                 </div>
                 <div className="bg-slate-950/70 border border-emerald-500/20 p-3 rounded-xl">
                   <div className="text-xs text-emerald-400 mb-1">ربح الزيادة</div>
-                  <div className="text-lg font-bold text-emerald-300">{stats.otherProfit.toLocaleString()} <span className="text-xs font-normal">ج.م</span></div>
+                  <div className="text-lg font-bold text-emerald-300">{oa.profit.toLocaleString()} <span className="text-xs font-normal">ج.م</span></div>
                 </div>
               </div>
             </div>
+              );
+            })}
           </div>
         ) : (
           <div className="bg-slate-900/50 border border-slate-800/80 p-4 rounded-2xl flex items-center justify-center text-slate-500 text-sm gap-2">
@@ -1640,7 +1654,7 @@ export default function App() {
                                     {item.deviceType || "موبايل"}
                                   </span>
                                   {isAdmin && isOtherAccount(item) && (
-                                    <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">بيكا</span>
+                                    <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">{item.clientOrSupplier}</span>
                                   )}
                                 </div>
                                 {item.imei && (
@@ -1965,12 +1979,13 @@ export default function App() {
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">حساب الجهاز (داخلي، مش بيظهر للعملاء)</label>
                   <select
-                    value={formData.clientOrSupplier === OTHER_ACCOUNT ? OTHER_ACCOUNT : "عبدو"}
+                    value={OTHER_ACCOUNTS.includes(formData.clientOrSupplier) ? formData.clientOrSupplier : "عبدو"}
                     onChange={(e) => setFormData({ ...formData, clientOrSupplier: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
                   >
                     <option value="عبدو">المحل (رأس المال)</option>
-                    <option value={OTHER_ACCOUNT}>حساب بيكا (منفصل)</option>
+                    <option value="بيكا">حساب بيكا (منفصل)</option>
+                    <option value="الهواري">حساب الهواري (منفصل)</option>
                   </select>
                 </div>
               )}
