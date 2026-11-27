@@ -438,7 +438,22 @@ export default function App() {
     setLoginError("");
     setIsLoggingIn(true);
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+      // تسجيل كل دخول ناجح في سجل الرقابة (الوقت + الجهاز)
+      try {
+        const ua = navigator.userAgent || "";
+        const os = /iPhone|iPad/.test(ua) ? "iPhone/iPad" : /Android/.test(ua) ? "Android" : /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "Mac" : /Linux/.test(ua) ? "Linux" : "جهاز غير معروف";
+        const br = /Edg\//.test(ua) ? "Edge" : /OPR\//.test(ua) ? "Opera" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : /Firefox\//.test(ua) ? "Firefox" : "متصفح";
+        await addDoc(collection(db, "artifacts", appId, "public", "data", "audit_logs"), {
+          actorEmail: cred.user.email,
+          actionType: "تسجيل دخول",
+          deviceName: `${os} - ${br}`,
+          details: ua.slice(0, 200),
+          createdAt: serverTimestamp(),
+        });
+      } catch (logErr) {
+        console.error("Login audit error:", logErr);
+      }
       setEmail("");
       setPassword("");
       setShowLoginModal(false);
