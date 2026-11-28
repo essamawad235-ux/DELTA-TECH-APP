@@ -14,7 +14,6 @@ import {
   addDoc,
   doc,
   onSnapshot,
-  getDocs,
   serverTimestamp,
   writeBatch,
   setDoc,
@@ -72,6 +71,35 @@ const INVOICE_TERMS = [
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// قراءة الكتالوج العام عبر REST مباشرة (بدون قناة Firestore المتدفقة)
+// الخطة المجانية تحد الاتصالات المتزامنة بـ 100 — REST لا يحجز اتصالاً
+const fromFirestoreFields = (fields) => {
+  const out = {};
+  Object.keys(fields || {}).forEach((k) => {
+    const v = fields[k];
+    if (v.stringValue !== undefined) out[k] = v.stringValue;
+    else if (v.integerValue !== undefined) out[k] = Number(v.integerValue);
+    else if (v.doubleValue !== undefined) out[k] = v.doubleValue;
+    else if (v.booleanValue !== undefined) out[k] = v.booleanValue;
+    else if (v.nullValue !== undefined) out[k] = null;
+    else if (v.timestampValue !== undefined)
+      out[k] = { seconds: Math.floor(Date.parse(v.timestampValue) / 1000) };
+    else out[k] = null;
+  });
+  return out;
+};
+
+const fetchPublicCatalogREST = async () => {
+  const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/artifacts/${appId}/public/data/public_catalog?pageSize=500&key=${firebaseConfig.apiKey}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("catalog REST " + res.status);
+  const data = await res.json();
+  return (data.documents || []).map((d) => ({
+    id: d.name.split("/").pop(),
+    ...fromFirestoreFields(d.fields),
+  }));
+};
 
 // الـ 20 جهاز المسحوبين من شيت Hessabat_ElAgheza_Abdo مع تحديد النوع
 const GOOGLE_SHEETS_DEVICES = [
@@ -324,20 +352,59 @@ export default function App() {
       setDataLoading(false);
     };
 
-    // الزوار: قراءة لمرة واحدة + تحديث تلقائي كل دقيقتين بدل اتصال مفتوح
-    // (الخطة المجانية تحد الاتصالات المتزامنة بـ 100 — كل زائر كان يحجز اتصالاً طوال تصفحه)
+    // الزوار: قراءة الكتالوج عبر REST (HTTP عادي، بلا اتصال مفتوح) + كاش 10 دقائق
+    // قناة Firestore المتدفقة تُرفض عند امتلاء حد الاتصالات المجانية، بينما REST يستمر بالعمل
     if (!user) {
       let cancelled = false;
+      const CACHE_KEY = "delta_public_catalog_v1";
+      const readCache = () => {
+        try {
+          const c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+          if (c && Array.isArray(c.items)) return c;
+        } catch (_) {}
+        return null;
+      };
+      const writeCache = (items) => {
+        try {
+          localStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({ t: Date.now(), items })
+          );
+        } catch (_) {}
+      };
+      const applyList = (list) => {
+        const sorted = [...list].sort(
+          (a, b) =>
+            (a.orderIndex ?? 999) - (b.orderIndex ?? 999) ||
+            (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+        );
+        setDevices(sorted);
+        setDataLoading(false);
+        setErrorMsg("");
+      };
       const loadOnce = async () => {
         try {
-          const snap = await getDocs(devicesCollectionRef);
-          if (!cancelled) applySnapshot(snap);
+          const items = await fetchPublicCatalogREST();
+          if (cancelled) return;
+          writeCache(items);
+          applyList(items);
         } catch (err) {
-          if (!cancelled) handleReadError(err);
+          console.error("Catalog REST error:", err);
+          if (cancelled) return;
+          const cached = readCache();
+          if (cached) {
+            applyList(cached.items);
+          } else {
+            handleReadError(err);
+          }
         }
       };
+      const cached = readCache();
+      if (cached) {
+        applyList(cached.items);
+      }
       loadOnce();
-      const refreshTimer = setInterval(loadOnce, 120000);
+      const refreshTimer = setInterval(loadOnce, 5 * 60 * 1000);
       return () => {
         cancelled = true;
         clearInterval(refreshTimer);
