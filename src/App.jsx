@@ -14,6 +14,7 @@ import {
   addDoc,
   doc,
   onSnapshot,
+  getDocs,
   serverTimestamp,
   writeBatch,
   setDoc,
@@ -303,27 +304,51 @@ export default function App() {
       user ? "devices" : "public_catalog"
     );
 
+    const applySnapshot = (snapshot) => {
+      const list = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+      list.sort(
+        (a, b) =>
+          (a.orderIndex ?? 999) - (b.orderIndex ?? 999) ||
+          (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+      );
+      setDevices(list);
+      setDataLoading(false);
+      setErrorMsg("");
+    };
+    const handleReadError = (err) => {
+      console.error("Firestore error:", err);
+      setErrorMsg("تعذر قراءة البيانات. تأكد من نشر Firestore Rules.");
+      setDataLoading(false);
+    };
+
+    // الزوار: قراءة لمرة واحدة + تحديث تلقائي كل دقيقتين بدل اتصال مفتوح
+    // (الخطة المجانية تحد الاتصالات المتزامنة بـ 100 — كل زائر كان يحجز اتصالاً طوال تصفحه)
+    if (!user) {
+      let cancelled = false;
+      const loadOnce = async () => {
+        try {
+          const snap = await getDocs(devicesCollectionRef);
+          if (!cancelled) applySnapshot(snap);
+        } catch (err) {
+          if (!cancelled) handleReadError(err);
+        }
+      };
+      loadOnce();
+      const refreshTimer = setInterval(loadOnce, 120000);
+      return () => {
+        cancelled = true;
+        clearInterval(refreshTimer);
+      };
+    }
+
+    // فريق العمل فقط: متابعة لحظية كما هي (اتصال أو اتصالان لا يؤثران على الحد)
     const unsubscribeData = onSnapshot(
       devicesCollectionRef,
-      (snapshot) => {
-        const list = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data(),
-        }));
-        list.sort(
-          (a, b) =>
-            (a.orderIndex ?? 999) - (b.orderIndex ?? 999) ||
-            (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
-        );
-        setDevices(list);
-        setDataLoading(false);
-        setErrorMsg("");
-      },
-      (err) => {
-        console.error("Firestore error:", err);
-        setErrorMsg("تعذر قراءة البيانات. تأكد من نشر Firestore Rules.");
-        setDataLoading(false);
-      }
+      applySnapshot,
+      handleReadError
     );
 
     return () => unsubscribeData();
